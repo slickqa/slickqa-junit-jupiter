@@ -14,26 +14,19 @@ public class ExampleTest extends SlickBaseTest {
 
     @Test
     @DisplayName("Example pass test")
-    @SlickMetaData(title = "Phone Number input validation",
-            purpose = "Verify that phone number input does not accept invalid entries",
-            component = "invest",
-            feature = "Customer information inputs",
+    @SlickMetaData(title = "Slick metadata title Example pass test",
+            purpose = "Example test that passes",
+            component = "slick-junit5",
+            feature = "Example pass test feature",
             steps = {
-                    @Step(step = "1: Run Invest Flow using BROKERAGE mode till Customer Information page"),
-                    @Step(step = "2: Verify that the phone number input does not accept blank input.",
-                            expectation = "An error message should appear - 'Please enter a valid phone number.'."),
-                    @Step(step = "3: Verify that the phone number input does not accept special characters (except " +
-                            "for a single '(') and any input that is no a digit will be converted into a single '('.",
-                            expectation = "An error message should appear - 'Please enter a valid phone number.'."),
-                    @Step(step = "4: Verify that the phone number input does not accept more than 10 digits."),
-                    @Step(step = "5: Verify that the phone number input does not accept less than 10 digits.",
-                            expectation = "An error message should appear - 'Phone number is invalid.'."),
+                    @Step(step = ": assert true",
+                            expectation = "appear - 'Please enter a valid phone number.'."),
             },
-            author = "crperez",
-            triageNote = "Whole on boarding UI for brokerage flow has been changed to react and need to be reformatted"
+            author = "leeard",
+            triageNote = "Example pass test triage note"
     )
     public void examplePassTest() throws Exception {
-        System.out.println("Soooo Faaat");
+        Assertions.assertTrue(true);
     }
 
     @Test
