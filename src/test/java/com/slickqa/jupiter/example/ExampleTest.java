@@ -14,18 +14,18 @@ public class ExampleTest extends SlickBaseTest {
 
     @Test
     @DisplayName("Example pass test")
-    @SlickMetaData(title = "Slick metadata title Example pass test",
+    @SlickMetaData(title = "Example pass test",
             purpose = "Example test that passes",
             component = "slick-junit5",
             feature = "Example pass test feature",
             steps = {
-                    @Step(step = ": assert true",
-                            expectation = "appear - 'Please enter a valid phone number.'."),
+                    @Step(step = "simply assert true",
+                            expectation = "test should pass"),
             },
             author = "leeard",
             triageNote = "Example pass test triage note"
     )
-    public void examplePassTest() throws Exception {
+    public void examplePassTestOne() throws Exception {
         Assertions.assertTrue(true);
     }
 

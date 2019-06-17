@@ -97,36 +97,32 @@ public class SlickJunitController {
                     buildReference.setName(buildName);
                 }
 
-                testrunName = configurationSource.getConfigurationEntry(ConfigurationNames.TESTRUN_NAME, null);
-
                 String testplanName = configurationSource.getConfigurationEntry(ConfigurationNames.TESTPLAN_NAME, null);
-                if(testplanName != null) {
-                    HashMap<String, String> query = new HashMap<>();
-                    query.put("project.id", project.getId());
-                    query.put("name", testplanName);
-                    TestPlan tplan = null;
-                    try {
-                        List<TestPlan> tplans = slickClient.testplans(query).getList();
-                        if(tplans != null && tplans.size() > 0) {
-                            tplan = tplans.get(0);
-                        }
-                    } catch (SlickError e) {
-                        // don't care
-                    }
-                    if(tplan == null) {
-                        tplan = new TestPlan();
-                        tplan.setName(testplanName);
-                        tplan.setProject(projectReference);
-                        tplan = slickClient.testplans().create(tplan);
-                    }
-                    testplanId = tplan.getId();
-                    if(testrunName == null) {
-                        testrunName = tplan.getName();
-                    }
+                if(testplanName == null) {
+                    testplanName = "Default_Testplan";
                 }
+                HashMap<String, String> query = new HashMap<>();
+                query.put("project.id", project.getId());
+                query.put("name", testplanName);
+                TestPlan tplan = null;
+                try {
+                    List<TestPlan> tplans = slickClient.testplans(query).getList();
+                    if (tplans != null && tplans.size() > 0) {
+                        tplan = tplans.get(0);
+                    }
+                } catch (SlickError e) {
+                    // don't care
+                }
+                if (tplan == null) {
+                    tplan = new TestPlan();
+                    tplan.setName(testplanName);
+                    tplan.setProject(projectReference);
+                    tplan = slickClient.testplans().create(tplan);
+                }
+                testplanId = tplan.getId();
 
                 testrun = new Testrun();
-                testrun.setName(testrunName);
+                testrun.setName(testplanName);
                 testrun.setTestplanId(testplanId);
                 testrun.setProject(projectReference);
                 testrun.setRelease(releaseReference);
@@ -192,6 +188,11 @@ public class SlickJunitController {
                     List<Testcase> testcases = slickClient.testcases(query).getList();
                     if(testcases != null && testcases.size() > 0) {
                         testcase = testcases.get(0);
+                        // update author if needed
+                        if(!metaData.author().equals("") && !metaData.author().equals(testcase.getAuthor())) {
+                            testcase.setAuthor(metaData.author());
+                            getSlickClient().testcase(testcase.getId()).update(testcase);
+                        }
                     }
                 } catch (SlickError e) {
                     // ignore
@@ -208,7 +209,8 @@ public class SlickJunitController {
                 testcase.setAutomated(true);
                 testcase.setAutomationId(automationId);
                 testcase.setAutomationKey(getValueOrNullIfEmpty(metaData.automationKey()));
-                testcase.setAutomationTool("junit");
+                testcase.setAutomationTool("junit_5");
+                testcase.setPurpose(metaData.purpose());
                 ComponentReference componentReference = null;
                 Component component = null;
                 if(metaData.component() != null && !"".equals(metaData.component())) {
