@@ -45,7 +45,7 @@ public class SlickJunitController {
      * @return an instance of
      */
     protected SlickConfigurationSource initializeConfigurationSource() {
-        return new SystemPropertyConfigurationSource();
+        return new PropertyOrEnvVariableConfigurationSource();
     }
 
     protected void initializeController() {
