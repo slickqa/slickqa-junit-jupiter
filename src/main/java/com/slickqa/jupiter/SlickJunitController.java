@@ -11,6 +11,7 @@ import com.slickqa.client.impl.JsonUtil;
 import com.slickqa.client.model.*;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.SlickConfigurationSource;
+import org.junit.jupiter.api.DisplayName;
 //import org.junit.runner.Description;
 
 import java.lang.reflect.Method;
@@ -23,7 +24,8 @@ import java.util.*;
  * not likely have to interact with this class unless they want to customize the process by extending.
  */
 public class SlickJunitController {
-    protected boolean usingSlick;
+    protected static boolean usingSlick;
+    public static ThreadLocal<Result> currentResult;
     protected SlickConfigurationSource configurationSource;
     protected SlickClient slickClient;
     protected Project project;
@@ -35,6 +37,7 @@ public class SlickJunitController {
         usingSlick = false;
         configurationSource = initializeConfigurationSource();
         results = new HashMap<>();
+        currentResult = new ThreadLocal<>();
         initializeController();
     }
 
@@ -137,7 +140,7 @@ public class SlickJunitController {
         }
     }
 
-    public boolean isUsingSlick() {
+    public static boolean isUsingSlick() {
         return usingSlick;
     }
 
@@ -171,52 +174,68 @@ public class SlickJunitController {
     }
 
     public void addResultFor(Method testDescription) throws SlickError {
-        if(isUsingSlick()) {
+        if (isUsingSlick()) {
             SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
-            if(metaData != null) {
-                String automationId = getAutomationId(testDescription);
-                Testcase testcase = null;
+            boolean hasMetaData = metaData != null;
 
-                HashMap<String, String> query = new HashMap<>();
-                query.put("project.id", project.getId());
-                query.put("automationId", automationId);
-                ProjectReference projectReference = new ProjectReference();
-                projectReference.setName(project.getName());
-                projectReference.setId(project.getId());
+            String automationId = getAutomationId(testDescription);
+            Testcase testcase = null;
 
-                try {
-                    List<Testcase> testcases = slickClient.testcases(query).getList();
-                    if(testcases != null && testcases.size() > 0) {
-                        testcase = testcases.get(0);
-                        // update author if needed
-                        if(!metaData.author().equals("") && !metaData.author().equals(testcase.getAuthor())) {
+            HashMap<String, String> query = new HashMap<>();
+            query.put("project.id", project.getId());
+            query.put("automationId", automationId);
+            ProjectReference projectReference = new ProjectReference();
+            projectReference.setName(project.getName());
+            projectReference.setId(project.getId());
+
+            try {
+                List<Testcase> testcases = slickClient.testcases(query).getList();
+                if (testcases != null && testcases.size() > 0) {
+                    testcase = testcases.get(0);
+                    // update author if needed
+                    if (hasMetaData) {
+                        if (!metaData.author().equals("") && !metaData.author().equals(testcase.getAuthor())) {
                             testcase.setAuthor(metaData.author());
                             getSlickClient().testcase(testcase.getId()).update(testcase);
                         }
                     }
-                } catch (SlickError e) {
-                    // ignore
                 }
+            } catch (SlickError e) {
+                // ignore
+            }
 
-                if(testcase == null) {
-                    testcase = new Testcase();
-                    testcase.setName(metaData.title());
-                    testcase.setProject(projectReference);
-                    testcase = slickClient.testcases().create(testcase);
-                }
-
+            boolean newTestcase = false;
+            if (testcase == null) {
+                testcase = new Testcase();
+                newTestcase = true;
+            }
+            if (hasMetaData) {
                 testcase.setName(metaData.title());
-                testcase.setAutomated(true);
-                testcase.setAutomationId(automationId);
+            } else {
+                if (testDescription.isAnnotationPresent(DisplayName.class)) {
+                    testcase.setName(testDescription.getAnnotation(DisplayName.class).value());
+                } else {
+                    testcase.setName(testDescription.getName());
+                }
+            }
+            testcase.setProject(projectReference);
+            if (newTestcase) {
+                testcase = slickClient.testcases().create(testcase);
+            }
+
+
+            testcase.setAutomated(true);
+            testcase.setAutomationId(automationId);
+            testcase.setAutomationTool("junit_5");
+            if (hasMetaData) {
                 testcase.setAutomationKey(getValueOrNullIfEmpty(metaData.automationKey()));
-                testcase.setAutomationTool("junit_5");
                 testcase.setPurpose(metaData.purpose());
                 ComponentReference componentReference = null;
                 Component component = null;
-                if(metaData.component() != null && !"".equals(metaData.component())) {
+                if (metaData.component() != null && !"".equals(metaData.component())) {
                     componentReference = new ComponentReference();
                     componentReference.setName(metaData.component());
-                    if(project.getComponents() != null) {
+                    if (project.getComponents() != null) {
                         for (Component possible : project.getComponents()) {
                             if (metaData.component().equals(possible.getName())) {
                                 componentReference.setId(possible.getId());
@@ -226,7 +245,7 @@ public class SlickJunitController {
                             }
                         }
                     }
-                    if(componentReference.getId() == null) {
+                    if (componentReference.getId() == null) {
                         component = new Component();
                         component.setName(metaData.component());
                         try {
@@ -241,32 +260,32 @@ public class SlickJunitController {
                 }
                 testcase.setComponent(componentReference);
                 FeatureReference featureReference = null;
-                if(metaData.feature() != null && !"".equals(metaData.feature()) && component != null) {
+                if (metaData.feature() != null && !"".equals(metaData.feature()) && component != null) {
                     featureReference = new FeatureReference();
                     featureReference.setName(metaData.feature());
                     Feature feature = null;
-                    if(component.getFeatures() != null) {
-                        for(Feature possible: component.getFeatures()) {
-                            if(metaData.feature().equals(possible.getName())) {
+                    if (component.getFeatures() != null) {
+                        for (Feature possible : component.getFeatures()) {
+                            if (metaData.feature().equals(possible.getName())) {
                                 featureReference.setId(possible.getId());
                                 feature = possible;
                                 break;
                             }
                         }
                     }
-                    if(feature == null) {
+                    if (feature == null) {
                         feature = new Feature();
                         feature.setName(metaData.feature());
-                        if(component.getFeatures() == null) {
+                        if (component.getFeatures() == null) {
                             component.setFeatures(new ArrayList<Feature>(1));
                         }
                         component.getFeatures().add(feature);
                         try {
                             component = slickClient.project(project.getId()).component(component.getId()).update(component);
                             project = slickClient.project(project.getId()).get();
-                            if(component.getFeatures() != null) {
-                                for(Feature possible: component.getFeatures()) {
-                                    if(metaData.feature().equals(possible.getName())) {
+                            if (component.getFeatures() != null) {
+                                for (Feature possible : component.getFeatures()) {
+                                    if (metaData.feature().equals(possible.getName())) {
                                         featureReference.setId(feature.getId());
                                     }
                                 }
@@ -281,44 +300,44 @@ public class SlickJunitController {
                             featureReference = null;
                         }
                     }
-                }
-                testcase.setFeature(featureReference);
-                if(metaData.steps() != null && metaData.steps().length > 0) {
-                    testcase.setSteps(new ArrayList<Step>(metaData.steps().length));
-                    for(com.slickqa.jupiter.annotations.Step metaStep : metaData.steps()) {
-                        Step slickStep = new Step();
-                        slickStep.setName(metaStep.step());
-                        slickStep.setExpectedResult(metaStep.expectation());
-                        testcase.getSteps().add(slickStep);
+                    testcase.setFeature(featureReference);
+                    if (metaData.steps() != null && metaData.steps().length > 0) {
+                        testcase.setSteps(new ArrayList<Step>(metaData.steps().length));
+                        for (com.slickqa.jupiter.annotations.Step metaStep : metaData.steps()) {
+                            Step slickStep = new Step();
+                            slickStep.setName(metaStep.step());
+                            slickStep.setExpectedResult(metaStep.expectation());
+                            testcase.getSteps().add(slickStep);
+                        }
                     }
                 }
-                testcase = slickClient.testcase(testcase.getId()).update(testcase);
-                TestcaseReference testReference = new TestcaseReference();
-                testReference.setName(testcase.getName());
-                testReference.setAutomationId(testcase.getAutomationId());
-                testReference.setAutomationKey(testcase.getAutomationKey());
-                testReference.setTestcaseId(testcase.getId());
-                testReference.setAutomationTool(testcase.getAutomationTool());
-
-                TestrunReference testrunReference = new TestrunReference();
-                testrunReference.setName(testrun.getName());
-                testrunReference.setTestrunId(testrun.getId());
-
-                Result result = new Result();
-                result.setProject(projectReference);
-                result.setTestrun(testrunReference);
-                result.setTestcase(testReference);
-                result.setStatus("NO_RESULT");
-                result.setReason("not run yet...");
-                result.setRecorded(new Date());
-                result = slickClient.results().create(result);
-                results.put(automationId, result);
             }
+            testcase = slickClient.testcase(testcase.getId()).update(testcase);
+            TestcaseReference testReference = new TestcaseReference();
+            testReference.setName(testcase.getName());
+            testReference.setAutomationId(testcase.getAutomationId());
+            testReference.setAutomationKey(testcase.getAutomationKey());
+            testReference.setTestcaseId(testcase.getId());
+            testReference.setAutomationTool(testcase.getAutomationTool());
+
+            TestrunReference testrunReference = new TestrunReference();
+            testrunReference.setName(testrun.getName());
+            testrunReference.setTestrunId(testrun.getId());
+
+            Result result = new Result();
+            result.setProject(projectReference);
+            result.setTestrun(testrunReference);
+            result.setTestcase(testReference);
+            result.setStatus("NO_RESULT");
+            result.setReason("not run yet...");
+            result.setRecorded(new Date());
+            result = slickClient.results().create(result);
+            results.put(automationId, result);
         }
     }
 
     public static String getValueOrNullIfEmpty(String value) {
-        if(value == null || "".equals(value)) {
+        if (value == null || "".equals(value)) {
             return null;
         } else {
             return value;

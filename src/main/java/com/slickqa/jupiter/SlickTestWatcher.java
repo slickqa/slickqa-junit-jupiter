@@ -18,9 +18,9 @@ import java.util.Optional;
 
 public class SlickTestWatcher implements TestWatcher{
 
-    private ThreadLocal<Result> currentResult;
 
     private ThreadLocal<SlickLogger> logger;
+    private SlickJunitController controller;
 
 
     private String PASS = "PASS";
@@ -29,10 +29,15 @@ public class SlickTestWatcher implements TestWatcher{
     private String BROKEN_TEST = "BROKEN_TEST";
     private String SKIPPED = "SKIPPED";
 
+    public SlickTestWatcher() {
+        logger = new ThreadLocal<>();
+        controller = SlickJunitControllerFactory.getControllerInstance();
+        logger.set(new SlickResultLogger(controller));
+    }
+
     public boolean isUsingSlick() {
         boolean retval = false;
 
-        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
         if(controller != null && controller.isUsingSlick()) {
             retval = true;
         }
@@ -106,14 +111,22 @@ public class SlickTestWatcher implements TestWatcher{
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
         Method testMethod = null;
         Optional<Method> testOptional = context.getTestMethod();
-        if (testOptional.isPresent()) {
-            if (isUsingSlick()) {
+        if (isUsingSlick()) {
+            if (testOptional.isPresent()) {
+                testMethod = testOptional.get();
+                if (null != cause) {
+                    if (java.lang.AssertionError.class.isAssignableFrom(cause.getClass())) {
+                        status = FAIL;
+                    }
+                    logger.get().error(cause.toString());
+                    logger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
+                }
                 Result result = controller.getResultFor(testMethod);
                 if (result != null) {
                     log().flushLogs();
                     Result update = new Result();
                     update.setFinished(new Date());
-                    update.setStatus(FAIL);
+                    update.setStatus(status);
                     update.setRunstatus(FINISHED);
                     Optional<Throwable> eOptional = context.getExecutionException();
                     Throwable e;

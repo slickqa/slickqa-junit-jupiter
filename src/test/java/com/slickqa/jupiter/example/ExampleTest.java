@@ -14,7 +14,7 @@ public class ExampleTest extends SlickBaseTest {
 
     @Test
     @DisplayName("Example pass test")
-    @SlickMetaData(title = "Example pass test",
+    @SlickMetaData(title = "Example pass test in metadata",
             purpose = "Example test that passes",
             component = "slick-junit5",
             feature = "Example pass test feature",
@@ -25,7 +25,7 @@ public class ExampleTest extends SlickBaseTest {
             author = "leeard",
             triageNote = "Example pass test triage note"
     )
-    public void examplePassTestOne() throws Exception {
+    public void examplePassTestNoDisplayName() throws Exception {
         Assertions.assertTrue(true);
     }
 
@@ -45,5 +45,9 @@ public class ExampleTest extends SlickBaseTest {
     @DisplayName("Example disabled test")
     @Disabled
     public void exampleDisabledTest() throws Exception {
+    }
+
+    @Test
+    public void examplePassNoSlickMetaDataOrDisplayNameTest() throws Exception {
     }
 }
