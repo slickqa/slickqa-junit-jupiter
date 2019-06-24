@@ -1,8 +1,9 @@
 plugins {
     id 'java-library'
-    id 'maven'
+    id 'maven-publish'
     id 'signing'
-    id "de.marcphilipp.nexus-publish" version "0.2.0"
+    id 'io.codearte.nexus-staging' version '0.21.0'
+    id 'de.marcphilipp.nexus-publish' version '0.2.0'
 }
 
 group 'com.slickqa'
@@ -42,57 +43,58 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name 'Slick Junit Jupiter Integration'
-        packaging 'jar'
-        // optionally artifactId can be defined here 
-        description 'Junit Jupiter plugins that allow reporting to the Slick Testcase Management Web Application'
-        url 'http://www.example.com/example-application'
-
-        scm {
-          connection 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
-          developerConnection 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
-          url 'https://github.com/slickqa/slickqa-junit-jupiter'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'slickqa-junit-jupiter'
+                description = 'Junit Jupiter extension that reports results to slick'
+                url = 'https://github.com/slickqa/slickqa-junit-jupiter'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'leeard'
+                        name = 'Lee Higginson'
+                        email = 'leeard@gmail.com'
+                    }
+                    developer {
+                        id = 'jasoncorbett'
+                        name = 'Jason Corbett'
+                        email = 'jasoncorbett@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
+                    developerConnection = 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
+                    url = 'https://github.com/slickqa/slickqa-junit-jupiter'
+                }
+            }
         }
-
-        licenses {
-          license {
-            name 'The Apache License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          }
-        }
-
-        developers {
-          developer {
-            id 'leeard'
-            name 'Lee Higginson'
-            email 'leeard@gmail.com'
-          }
-          developer {
-            id 'jasoncorbett'
-            name 'Jason Corbett'
-            email 'jasoncorbett@gmail.com'
-          }
-        }
-      }
     }
-  }
 }
+
+signing {
+    required { isReleaseVersion }
+    sign publishing.publications.mavenJava
+}
+
+nexusStaging {
+    packageGroup = 'com.slickqa'
+    username = ossrhUsername
+    password = ossrhPassword
+}
+
+nexusPublishing {
+    username = ossrhUsername // defaults to project.properties["nexusUsername"]
+    password = ossrhPassword // defaults to project.properties["nexusPassword"]
+}
+
+
