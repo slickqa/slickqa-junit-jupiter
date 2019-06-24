@@ -1,9 +1,15 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven'
+    id 'signing'
+    id "de.marcphilipp.nexus-publish" version "0.2.0"
 }
 
 group 'com.slickqa'
-version '1.0.0-SNAPSHOT'
+version '1.0.0-' + projectBuildNumber
+archivesBaseName = "slickqa-junit-jupiter"
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 sourceCompatibility = 1.8
 
@@ -20,4 +26,73 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier.set("javadoc")
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'Slick Junit Jupiter Integration'
+        packaging 'jar'
+        // optionally artifactId can be defined here 
+        description 'Junit Jupiter plugins that allow reporting to the Slick Testcase Management Web Application'
+        url 'http://www.example.com/example-application'
+
+        scm {
+          connection 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
+          developerConnection 'scm:git:https://github.com/slickqa/slickqa-junit-jupiter.git'
+          url 'https://github.com/slickqa/slickqa-junit-jupiter'
+        }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'leeard'
+            name 'Lee Higginson'
+            email 'leeard@gmail.com'
+          }
+          developer {
+            id 'jasoncorbett'
+            name 'Jason Corbett'
+            email 'jasoncorbett@gmail.com'
+          }
+        }
+      }
+    }
+  }
 }
