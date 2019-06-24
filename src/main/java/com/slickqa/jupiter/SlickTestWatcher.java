@@ -18,9 +18,9 @@ import java.util.Optional;
 
 public class SlickTestWatcher implements TestWatcher{
 
-    private ThreadLocal<Result> currentResult;
 
     private ThreadLocal<SlickLogger> logger;
+    private SlickJunitController controller;
 
 
     private String PASS = "PASS";
@@ -29,10 +29,15 @@ public class SlickTestWatcher implements TestWatcher{
     private String BROKEN_TEST = "BROKEN_TEST";
     private String SKIPPED = "SKIPPED";
 
+    public SlickTestWatcher() {
+        logger = new ThreadLocal<>();
+        controller = SlickJunitControllerFactory.getControllerInstance();
+        logger.set(new SlickResultLogger(controller));
+    }
+
     public boolean isUsingSlick() {
         boolean retval = false;
 
-        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
         if(controller != null && controller.isUsingSlick()) {
             retval = true;
         }
@@ -59,8 +64,8 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testSuccessful(ExtensionContext context) {
-        System.out.println("Test Success Yomama");
         if (isUsingSlick()) {
+            logger.get().debug("Test PASSED.  Reporting to slick");
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
             Method testMethod = null;
             Optional<Method> testOptional = context.getTestMethod();
@@ -75,7 +80,7 @@ public class SlickTestWatcher implements TestWatcher{
                     controller.getSlickClient().result(result.getId()).update(update);
                 } catch (SlickError e) {
                     e.printStackTrace();
-                    System.err.println("!! ERROR: Unable to update slick result with pass!!");
+                    logger.get().error("!! ERROR: Unable to update slick result with pass!!", e);
                 }
             }
         }
@@ -89,8 +94,7 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testAborted(ExtensionContext context, Throwable cause) {
-        System.out.println("Test Aborted Yomama");
-
+        testFailed(context, cause);
     }
 
     /**
@@ -101,19 +105,26 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
-        System.out.println("Test Failed Yomama");
-        String status = BROKEN_TEST;
-        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
-        Method testMethod = null;
-        Optional<Method> testOptional = context.getTestMethod();
-        if (testOptional.isPresent()) {
-            if (isUsingSlick()) {
+        if (isUsingSlick()) {
+            String status = BROKEN_TEST;
+            SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+            Method testMethod = null;
+            Optional<Method> testOptional = context.getTestMethod();
+            if (testOptional.isPresent()) {
+                testMethod = testOptional.get();
+                if (null != cause) {
+                    if (java.lang.AssertionError.class.isAssignableFrom(cause.getClass())) {
+                        status = FAIL;
+                    }
+                    logger.get().error(cause.toString());
+                    logger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
+                }
                 Result result = controller.getResultFor(testMethod);
                 if (result != null) {
                     log().flushLogs();
                     Result update = new Result();
                     update.setFinished(new Date());
-                    update.setStatus(FAIL);
+                    update.setStatus(status);
                     update.setRunstatus(FINISHED);
                     Optional<Throwable> eOptional = context.getExecutionException();
                     Throwable e;
@@ -132,55 +143,6 @@ public class SlickTestWatcher implements TestWatcher{
                 }
             }
         }
-
-//        if(isUsingSlick() && threadSlickResultLogger != null && threadSlickResultLogger.get() != null) {
-//            Throwable cause = testResult.getThrowable();
-//            if (null != cause) {
-//                if (cause.toString().contains("java.lang.AssertionError")) {
-//                    status = FAIL;
-//                }
-//                threadSlickResultLogger.get().error(cause.toString());
-//                threadSlickResultLogger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
-//            }
-//            Result result = SlickSuite.getSlickTestNGController().getResultFor(testResult.getMethod().getConstructorOrMethod().getMethod());
-//            if (result != null) {
-//                Result update = new Result();
-//                update.setFinished(new Date());
-//                update.setStatus(status);
-//                update.setRunstatus(FINISHED);
-//                StringWriter sw = new StringWriter();
-//                cause.printStackTrace(new PrintWriter(sw));
-//                update.setReason(sw.toString());
-//                try {
-//                    SlickSuite.getSlickTestNGController().updateResultFor(result.getId(), update);
-//                } catch (SlickError e) {
-//                    e.printStackTrace();
-//                    System.err.println("!! ERROR: Unable to fail result !!");
-//                }
-//            }
-//            SlickMetaData metaData = testResult.getMethod().getConstructorOrMethod().getMethod().getAnnotation(SlickMetaData.class);
-//            if(metaData != null && metaData.triageNote() != null && !"".equals(metaData.triageNote())) {
-//                threadSlickResultLogger.get().debug(metaData.triageNote());
-//
-//                String triageNote = metaData.triageNote();
-//                LogEntry triageNoteEntry = new LogEntry();
-//                triageNoteEntry.setLoggerName("slick.note");
-//                triageNoteEntry.setLevel("WARN");
-//                triageNoteEntry.setEntryTime(new Date());
-//                triageNoteEntry.setMessage(metaData.triageNote());
-//
-//                SlickResultLogger triageLogger = new SlickResultLogger(threadCurrentResultId.get());
-//                triageLogger.setLoggerName("slick.note");
-//                triageLogger.addLogEntry(triageNoteEntry);
-//                triageLogger.flushLogs();
-//
-//            }
-//            threadSlickResultLogger.get().flushLogs();
-//        }
-//        else {
-//            logger.debug("Not logging to slick");
-//        }
-
     }
 
     public SlickLogger log() {

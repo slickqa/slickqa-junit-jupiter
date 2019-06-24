@@ -1,10 +1,13 @@
 package com.slickqa.jupiter;
 
+import com.slickqa.client.errors.SlickError;
+import com.slickqa.client.model.Result;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 
 
 public class BeforeEachExtension implements BeforeEachCallback {
@@ -13,7 +16,7 @@ public class BeforeEachExtension implements BeforeEachCallback {
         boolean retval = false;
 
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
-        if(controller != null && controller.isUsingSlick()) {
+        if(controller != null && SlickJunitController.isUsingSlick()) {
             retval = true;
         }
 
@@ -33,7 +36,21 @@ public class BeforeEachExtension implements BeforeEachCallback {
             if (context.getTestMethod().isPresent()) {
                 Method testMethod = context.getTestMethod().get();
                 //System.out.println(MessageFormat.format("Test found: {0}", testMethod.getName()));
-                controller.addResultFor(testMethod);
+                Result result = controller.getOrCreateResultFor(testMethod);
+                Result update = new Result();
+                update.setStarted(new Date());
+                update.setReason("");
+                update.setRunstatus("RUNNING");
+                Result updatedResult;
+                try {
+                    updatedResult = controller.getSlickClient().result(result.getId()).update(update);
+                    SlickJunitController.currentResult.set(updatedResult);
+                    //SlickTestWatcher.currentResult.set(controller.getSlickClient().result(result.getId()).get());
+                } catch (SlickError e) {
+                    e.printStackTrace();
+                    System.err.println("!! ERROR: Unable to set result to RUNNING. !!");
+                    SlickJunitController.currentResult.set(null);
+                }
             }
         }
     }
