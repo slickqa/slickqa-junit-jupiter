@@ -3,6 +3,11 @@ package com.slickqa.jupiter.example;
 import com.slickqa.jupiter.SlickBaseTest;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.annotations.Step;
+
+import static java.time.Duration.of;
+import static java.time.Duration.ofMillis;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,7 +18,7 @@ public class ExampleTest extends SlickBaseTest {
 
 
     @Test
-    @DisplayName("Example pass test")
+    @DisplayName("With SlickMetaData pass test")
     @SlickMetaData(title = "Example pass test in metadata",
             purpose = "Example test that passes",
             component = "slick-junit5",
@@ -23,20 +28,38 @@ public class ExampleTest extends SlickBaseTest {
                             expectation = "test should pass"),
             },
             author = "leeard",
-            triageNote = "Example pass test triage note"
+            triageNote = "pass test triage note"
     )
-    public void examplePassTestNoDisplayName() throws Exception {
+
+    public void testNoSlickMetaDataNoDisplayName() throws Exception {
         Assertions.assertTrue(true);
     }
 
     @Test
-    @DisplayName("Example fail test")
+    @SlickMetaData(title = "Fail with SlickMetaData and DisplayName",
+            purpose = "Slick metadata takes precedence",
+            component = "slick-junit5",
+            feature = "Testwatcher",
+            steps = {
+                    @Step(step = "simply assert true",
+                            expectation = "test should pass"),
+            },
+            author = "leeard",
+            triageNote = "pass test triage note"
+    )
+    @DisplayName("This title should not show in slick")
+    public void testBothSlickMetaDataAndDisplayName() throws Exception {
+        Assertions.assertTrue(true);
+    }
+
+    @Test
+    @DisplayName("Fail test with junit 5 Display Name only")
     public void testExampleFail() throws Exception {
         Assertions.assertTrue(false);
     }
 
     @Test
-    public void exampleAbortedTest() throws Exception {
+    public void shouldBeBrokenTest() throws Exception {
         int myint = 1/0;
 
     }
@@ -50,4 +73,14 @@ public class ExampleTest extends SlickBaseTest {
     @Test
     public void examplePassNoSlickMetaDataOrDisplayNameTest() throws Exception {
     }
+
+    @Test
+    void assertTimeout_runsLate_failsButFinishes() {
+        assertTimeout(ofMillis(100), () -> {
+            Thread.sleep(200);
+            // you will see this message
+            System.out.println("Woke up");
+        });
+    }
 }
+
