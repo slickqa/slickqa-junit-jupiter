@@ -1,4 +1,4 @@
-package com.slickqa.jupiter.example;
+package com.slickqa.jupiter.e2e.example;
 
 import com.slickqa.jupiter.SlickBaseTest;
 import com.slickqa.jupiter.annotations.SlickMetaData;

@@ -26,7 +26,11 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        filter {
+            excludeTestsMatching 'com.slickqa.jupiter.e2e.*'
+        }
+    }
 }
 
 task javadocJar(type: Jar) {
