@@ -33,6 +33,14 @@ test {
     }
 }
 
+task e2eTest(type: Test) {
+    useJUnitPlatform {
+        filter {
+            includeTestsMatching 'com.slickqa.jupiter.e2e.tests.*'
+        }
+    }
+}
+
 task javadocJar(type: Jar) {
     archiveClassifier.set("javadoc")
     from javadoc
