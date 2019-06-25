@@ -13,7 +13,7 @@ pipeline {
                     if [ "$BRANCH_NAME" != "master" ]; then PROJ_BUILD_NUMBER="${BRANCH_NAME}-${PROJ_BUILD_NUMBER}"; fi
                     echo "projectBuildNumber=${PROJ_BUILD_NUMBER}" >gradle.properties
                 '''
-                sh './gradlew clean package -x test'
+                sh './gradlew clean build -x test'
             }
         }
         stage('Test') { 
