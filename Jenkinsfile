@@ -27,6 +27,12 @@ pipeline {
             }
         }
         stage('End To End Tests') {
+            when {
+                anyOf {
+                    branch 'master';
+                    changeRequest()
+                }
+            }
             steps {
                 sh './gradlew e2eTest'
             }
