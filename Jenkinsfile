@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'openjdk:8-jdk-stretch'
-            args '-v /data/jenkins/.gnupg:/.gnupg -v /data/docker/gradle:/.gradle -e GRADLE_USER_HOME="/.gradle"'
+            args '-v /data/jenkins/.gnupg:/.gnupg -v /data/docker/gradle:/.gradle -e GRADLE_USER_HOME="/.gradle" -e SLICK_E2E_BASEURL=http://slick/api --network slick --link slick'
         }
     }
     stages {
@@ -23,6 +23,22 @@ pipeline {
             post {
                 always {
                     junit 'build/test-results/test/*.xml'
+                }
+            }
+        }
+        stage('End To End Tests') {
+            when {
+                anyOf {
+                    branch 'master';
+                    changeRequest()
+                }
+            }
+            steps {
+                sh './gradlew e2eTest'
+            }
+            post {
+                always {
+                    junit 'build/test-results/e2eTest/*.xml'
                 }
             }
         }

@@ -38,6 +38,12 @@ public class ConfigurationNames {
     static public final String TESTRUN_NAME = "slick.testrun";
 
     /**
+     * The id of the testrun. If a testrun with the id can't be found it will be created.  If one exists
+     * already the tests are added to it
+     */
+    static public final String TESTRUN_ID = "slick.testrunid";
+
+    /**
      * The URL for the result to run.  If this is specified, and there is only one test being run, then a new result
      * is not created.  Instead of creating a new result, the one specified in the URL is updated when the result
      * finishes.

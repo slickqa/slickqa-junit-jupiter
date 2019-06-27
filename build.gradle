@@ -22,13 +22,23 @@ dependencies {
     //testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     compile 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+    compile 'org.junit.platform:junit-platform-launcher:1.4.2'
     compile 'com.slickqa:slickqa-java-client:1.0.3-6'
+    testCompile 'org.mongodb:bson:3.10.2'
 }
 
 test {
     useJUnitPlatform {
         filter {
             excludeTestsMatching 'com.slickqa.jupiter.e2e.*'
+        }
+    }
+}
+
+task e2eTest(type: Test) {
+    useJUnitPlatform {
+        filter {
+            includeTestsMatching 'com.slickqa.jupiter.e2e.tests.*'
         }
     }
 }
