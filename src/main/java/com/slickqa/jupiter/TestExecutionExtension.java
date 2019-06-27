@@ -84,47 +84,4 @@ public class TestExecutionExtension implements TestExecutionListener {
 
     }
 
-    /**
-     * Called when the execution of a leaf or subtree of the {@link TestPlan}
-     * has finished, regardless of the outcome.
-     *
-     * <p>The {@link TestIdentifier} may represent a test or a container.
-     *
-     * <p>This method will only be called if the test or container has not
-     * been {@linkplain #executionSkipped skipped}.
-     *
-     * <p>This method will be called for a container {@code TestIdentifier}
-     * <em>after</em> all of its children have been
-     * {@linkplain #executionSkipped skipped} or have
-     * {@linkplain #executionFinished finished}.
-     *
-     * <p>The {@link TestExecutionResult} describes the result of the execution
-     * for the supplied {@code TestIdentifier}. The result does not include or
-     * aggregate the results of its children. For example, a container with a
-     * failing test will be reported as {@link Status#SUCCESSFUL SUCCESSFUL} even
-     * if one or more of its children are reported as {@link Status#FAILED FAILED}.
-     *
-     * @param testIdentifier      the identifier of the finished test or container
-     * @param testExecutionResult the (unaggregated) result of the execution for
-     *                            the supplied {@code TestIdentifier}
-     * @see TestExecutionResult
-     */
-    @Override
-    public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-
-    }
-
-    /**
-     * Called when additional test reporting data has been published for
-     * the supplied {@link TestIdentifier}.
-     *
-     * <p>Can be called at any time during the execution of a test plan.
-     *
-     * @param testIdentifier describes the test or container to which the entry pertains
-     * @param entry          the published {@code ReportEntry}
-     */
-    @Override
-    public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
-
-    }
 }
