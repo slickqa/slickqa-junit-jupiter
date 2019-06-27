@@ -124,6 +124,7 @@ public class SlickTestWatcher implements TestWatcher{
                         status = FAIL;
                     }
                     String reasonPrepend = "";
+                    String reason = "";
                     if (status.equals(SKIPPED)) {
                         logger.get().error("Threw Exception in @BeforeEach (Setup)");
                     }
