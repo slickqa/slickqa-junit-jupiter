@@ -125,13 +125,24 @@ public class SlickJunitController {
                 }
                 testplanId = tplan.getId();
 
-                testrun = new Testrun();
-                testrun.setName(testplanName);
-                testrun.setTestplanId(testplanId);
-                testrun.setProject(projectReference);
-                testrun.setRelease(releaseReference);
-                testrun.setBuild(buildReference);
-                testrun = slickClient.testruns().create(testrun);
+                String testrunId = configurationSource.getConfigurationEntry(ConfigurationNames.TESTRUN_ID, null);
+                if(testrunId != null) {
+                    try {
+                        testrun = slickClient.testrun(testrunId).get();
+                    } catch (SlickError e) {
+                        // doesn't matter, we'll just create it.
+                    }
+                }
+                if(testrun == null) {
+                    testrun = new Testrun();
+                    testrun.setId(testrunId);
+                    testrun.setName(testplanName);
+                    testrun.setTestplanId(testplanId);
+                    testrun.setProject(projectReference);
+                    testrun.setRelease(releaseReference);
+                    testrun.setBuild(buildReference);
+                    testrun = slickClient.testruns().create(testrun);
+                }
 
                 usingSlick = true;
             } catch (SlickError e) {

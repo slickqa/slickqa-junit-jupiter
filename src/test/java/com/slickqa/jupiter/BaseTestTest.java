@@ -9,6 +9,7 @@ import org.junit.platform.commons.util.AnnotationUtils;
 import java.util.HashMap;
 import java.util.List;
 
+@DisplayName("SlickBaseTest Tests")
 public class BaseTestTest {
     @Test
     @DisplayName("Base Test Applies Slick Extensions")
@@ -28,7 +29,7 @@ public class BaseTestTest {
         }
 
         for(Class expectedExtension : foundExtensions.keySet()) {
-            assertTrue(foundExtensions.get(expectedExtension), "Extension " + expectedExtension.getName() + " was not found on SlickBaseTest, but should have been!");
+            assertTrue(foundExtensions.get(expectedExtension), "Extension " + expectedExtension.getName() + " was not found on SlickBaseTest, but should have been applied with @ExtendWith!");
         }
     }
 }

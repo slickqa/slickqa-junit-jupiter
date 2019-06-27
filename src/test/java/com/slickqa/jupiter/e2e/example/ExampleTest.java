@@ -82,5 +82,15 @@ public class ExampleTest extends SlickBaseTest {
             System.out.println("Woke up");
         });
     }
+
+    @SlickMetaData(
+            title = "Simple example of a passing test",
+            steps = {
+            }
+    )
+    @Test
+    public void examplePassTest() {
+    }
+
 }
 
