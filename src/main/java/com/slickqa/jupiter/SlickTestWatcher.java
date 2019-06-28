@@ -6,6 +6,7 @@ import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.annotations.SlickLogger;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.*;
 import org.junit.jupiter.api.extension.TestWatcher;
 
 import javax.swing.text.html.Option;
@@ -77,7 +78,8 @@ public class SlickTestWatcher implements TestWatcher{
                 update.setStatus(PASS);
                 update.setRunstatus(FINISHED);
                 try {
-                    controller.getSlickClient().result(result.getId()).update(update);
+                    Result updatedResult = controller.getSlickClient().result(result.getId()).update(update);
+                    SlickJunitController.currentResult.set(updatedResult);
                 } catch (SlickError e) {
                     e.printStackTrace();
                     logger.get().error("!! ERROR: Unable to update slick result with pass!!", e);
@@ -107,14 +109,24 @@ public class SlickTestWatcher implements TestWatcher{
     public void testFailed(ExtensionContext context, Throwable cause) {
         if (isUsingSlick()) {
             String status = BROKEN_TEST;
+            Store store = context.getStore(Namespace.create(context.getUniqueId()));
+            Boolean skipped = store.get("skipTest", boolean.class);
+            if (skipped) {
+                status = SKIPPED;
+            }
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
             Method testMethod = null;
             Optional<Method> testOptional = context.getTestMethod();
             if (testOptional.isPresent()) {
                 testMethod = testOptional.get();
-                if (null != cause) {
+                if (cause != null) {
                     if (java.lang.AssertionError.class.isAssignableFrom(cause.getClass())) {
                         status = FAIL;
+                    }
+                    String reasonPrepend = "";
+                    String reason = "";
+                    if (status.equals(SKIPPED)) {
+                        logger.get().error("Threw Exception in @BeforeEach (Setup)");
                     }
                     logger.get().error(cause.toString());
                     logger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
@@ -135,7 +147,8 @@ public class SlickTestWatcher implements TestWatcher{
                         update.setReason(e.getMessage() + "\n" + sw.toString());
                     }
                     try {
-                        controller.getSlickClient().result(result.getId()).update(update);
+                        Result updatedResult = controller.getSlickClient().result(result.getId()).update(update);
+                        SlickJunitController.currentResult.set(updatedResult);
                     } catch (SlickError err) {
                         err.printStackTrace();
                         System.err.println("!! ERROR: Unable to update slick result with a fail status!!");

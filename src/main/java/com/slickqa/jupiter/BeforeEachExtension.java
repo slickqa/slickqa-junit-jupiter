@@ -5,6 +5,7 @@ import com.slickqa.client.model.Result;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.*;
 
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -32,6 +33,8 @@ public class BeforeEachExtension implements BeforeEachCallback {
     public void beforeEach(ExtensionContext context) throws Exception {
         if (isUsingSlick()) {
             System.out.println(")( BeforeEachCallback");
+            Store store = context.getStore(Namespace.create(context.getUniqueId()));
+            store.put("skipTest", true);
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
             if (context.getTestMethod().isPresent()) {
                 Method testMethod = context.getTestMethod().get();
