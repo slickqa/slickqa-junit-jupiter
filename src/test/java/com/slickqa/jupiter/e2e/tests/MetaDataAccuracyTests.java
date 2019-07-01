@@ -73,8 +73,7 @@ public class MetaDataAccuracyTests {
         assertNotNull(result, "The result from slick should not be null");
         Testcase slickTestcase = util.slick.testcase(result.getTestcase().getTestcaseId()).get();
         SlickMetaData info = test.getDeclaredAnnotation(SlickMetaData.class);
-        // TODO: fix component on result and re-enable assert
-        // assertEquals(info.component(), result.getComponent().getName(), "Component of result should come from SlickMetaData");
+        assertEquals(info.component(), result.getComponent().getName(), "Component of result should come from SlickMetaData");
         assertEquals(info.component(), slickTestcase.getComponent().getName(), "Component of test case should have come from SlickMetaData");
     }
 
