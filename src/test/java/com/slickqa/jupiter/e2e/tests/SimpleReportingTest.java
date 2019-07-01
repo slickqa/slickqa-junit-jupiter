@@ -1,7 +1,5 @@
 package com.slickqa.jupiter.e2e.tests;
 
-import com.slickqa.client.SlickClient;
-import com.slickqa.client.SlickClientFactory;
 import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.e2e.SlickJunitRunner;
