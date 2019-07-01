@@ -62,7 +62,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                     }
                 }
             }
-            if (controller.configurationSource.getConfigurationEntry("scheduleTests").toLowerCase() == "true") {
+            if (controller.configurationSource.getConfigurationEntry("scheduleTests").toLowerCase().equals("true")) {
                 // TODO figure out how to stop tests from running
             }
         }
