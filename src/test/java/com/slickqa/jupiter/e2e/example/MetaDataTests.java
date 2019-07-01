@@ -6,6 +6,8 @@ import com.slickqa.jupiter.annotations.Step;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class MetaDataTests extends SlickBaseTest {
 
     @Test
@@ -23,7 +25,9 @@ public class MetaDataTests extends SlickBaseTest {
             },
             feature = "a feature",
             component = "example component",
-            author = "yomama"
+            author = "yomama",
+            automationId = "UniqueAutomationIdForThisTest",
+            automationKey = "AutomationKey"
     )
     public void testSlickMetaData() {
     }
@@ -39,6 +43,17 @@ public class MetaDataTests extends SlickBaseTest {
 
     @Test
     public void testMethodNameOnly() {
+    }
+
+
+    @Test
+    @SlickMetaData(
+            title = "Test of Triage Note",
+            steps = {},
+            triageNote = "Yomama"
+    )
+    public void triageNoteTest() {
+        assertTrue(false, "This will cause a triage note to be applied");
     }
 
 }
