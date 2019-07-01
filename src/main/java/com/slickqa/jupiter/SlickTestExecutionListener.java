@@ -1,6 +1,7 @@
 package com.slickqa.jupiter;
 
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.reporting.ReportEntry;
@@ -51,7 +52,9 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                                 Class<?> clazz = Class.forName(className);
                                 try {
                                     Method testMethod = clazz.getMethod(methodName);
-                                    controller.getOrCreateResultFor(testMethod);
+                                    if (!testMethod.isAnnotationPresent(Disabled.class)) {
+                                        controller.getOrCreateResultFor(testMethod);
+                                    }
                                 } catch (NoSuchMethodException e) {
                                     // nada
                                 }

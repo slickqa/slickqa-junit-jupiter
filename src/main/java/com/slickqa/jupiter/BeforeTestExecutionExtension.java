@@ -14,6 +14,7 @@ public class BeforeTestExecutionExtension implements BeforeTestExecutionCallback
     public void beforeTestExecution(ExtensionContext context) throws Exception {
         System.out.println(")( BeforeTestExecutionExtension");
         Store store = context.getStore(Namespace.create(context.getUniqueId()));
+        // Made it past setup.
         store.put("skipTest", false);
 
     }

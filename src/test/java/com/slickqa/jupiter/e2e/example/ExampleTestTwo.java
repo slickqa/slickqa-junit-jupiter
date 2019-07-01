@@ -63,7 +63,7 @@ public class ExampleTestTwo extends SlickBaseTest {
     }
 
     @Test
-    @DisplayName("Example disabled test")
+    @DisplayName("Example disabled test two")
     @Disabled
     public void exampleDisabledTest() throws Exception {
     }
