@@ -1,18 +1,20 @@
-package com.slickqa.jupiter.e2e.example.ExampleChild;
+package com.slickqa.jupiter.example;
 
 import com.slickqa.jupiter.SlickBaseTest;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.annotations.Step;
+
+import static java.time.Duration.of;
+import static java.time.Duration.ofMillis;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static java.time.Duration.ofMillis;
-import static org.junit.jupiter.api.Assertions.assertTimeout;
+import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("ExampleTests")
-public class ExampleChildTest extends SlickBaseTest {
+public class ExampleTest extends SlickBaseTest {
 
 
     @Test
