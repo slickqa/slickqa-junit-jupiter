@@ -3,7 +3,7 @@ package com.slickqa.jupiter.e2e.tests;
 import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.e2e.SlickJunitRunner;
-import com.slickqa.jupiter.example.ExampleTest;
+import com.slickqa.jupiter.e2e.example.ExampleTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
