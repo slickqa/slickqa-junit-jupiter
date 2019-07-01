@@ -123,11 +123,6 @@ public class SlickTestWatcher implements TestWatcher{
                     if (java.lang.AssertionError.class.isAssignableFrom(cause.getClass())) {
                         status = FAIL;
                     }
-                    String reasonPrepend = "";
-                    String reason = "";
-                    if (status.equals(SKIPPED)) {
-                        logger.get().error("Threw Exception in @BeforeEach (Setup)");
-                    }
                     logger.get().error(cause.toString());
                     logger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
                 }
@@ -144,7 +139,11 @@ public class SlickTestWatcher implements TestWatcher{
                         e = eOptional.get();
                         StringWriter sw = new StringWriter();
                         e.printStackTrace(new PrintWriter(sw));
-                        update.setReason(e.getMessage() + "\n" + sw.toString());
+                        if (status.equals(SKIPPED)) {
+                            update.setReason("Setup Exception: " + e.getMessage() + "\n" + sw.toString());
+                        } else {
+                            update.setReason(e.getMessage() + "\n" + sw.toString());
+                        }
                     }
                     try {
                         Result updatedResult = controller.getSlickClient().result(result.getId()).update(update);

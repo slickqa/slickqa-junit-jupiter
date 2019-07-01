@@ -6,7 +6,6 @@ import com.slickqa.client.errors.SlickError;
 import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.ConfigurationNames;
 import com.slickqa.jupiter.SlickJunitControllerFactory;
-import com.slickqa.jupiter.TestExecutionExtension;
 import org.bson.types.ObjectId;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;

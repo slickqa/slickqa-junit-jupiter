@@ -37,9 +37,11 @@ public class SchedulingExecutionCondition implements ExecutionCondition, TestIns
      **/
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-//        if (System.getProperty("scheduleTests", "false").equalsIgnoreCase("true")) {
-//            return ConditionEvaluationResult.disabled("Test scheduled only");
-//        }
+        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+        if (controller.configurationSource.getConfigurationEntry("scheduleTests", "false").
+                equalsIgnoreCase("true")) {
+            return ConditionEvaluationResult.disabled("Test scheduled only");
+        }
         return ConditionEvaluationResult.enabled("Test/s will run");
     }
 }
