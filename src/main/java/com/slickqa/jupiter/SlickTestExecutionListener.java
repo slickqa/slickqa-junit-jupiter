@@ -2,12 +2,29 @@ package com.slickqa.jupiter;
 
 
 import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
-public class TestExecutionExtension implements TestExecutionListener {
+import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.Set;
+
+public class SlickTestExecutionListener implements TestExecutionListener {
+
+    boolean isUsingSlick(SlickJunitController controller) {
+        boolean retval = false;
+
+        if(controller != null && SlickJunitController.isUsingSlick()) {
+            retval = true;
+        }
+
+        return retval;
+    }
+
     /**
      * Called when the execution of the {@link TestPlan} has started,
      * <em>before</em> any test has been executed.
@@ -16,7 +33,39 @@ public class TestExecutionExtension implements TestExecutionListener {
      */
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        System.out.println("yo");
+        System.out.println(")( SlickTestExecutionListener");
+        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+        if (isUsingSlick(controller)) {
+            Set<TestIdentifier> testRoot = testPlan.getChildren("[engine:junit-jupiter]");
+            for (TestIdentifier child : testRoot) {
+                System.out.println(child.getUniqueId() + " is a container: " + child.isContainer());
+                for (TestIdentifier h : testPlan.getChildren(child.getUniqueId())) {
+                    System.out.println(h.getUniqueId() + " is a container: " + h.isContainer());
+                    if (!h.isContainer()) {
+                        Optional<TestSource> sourceOptional = h.getSource();
+                        if (sourceOptional.isPresent()) {
+                            TestSource source = sourceOptional.get();
+                            String className = ((MethodSource) source).getClassName();
+                            String methodName = ((MethodSource) source).getMethodName();
+                            try {
+                                Class<?> clazz = Class.forName(className);
+                                try {
+                                    Method testMethod = clazz.getMethod(methodName);
+                                    controller.getOrCreateResultFor(testMethod);
+                                } catch (NoSuchMethodException e) {
+                                    // nada
+                                }
+                            } catch (ClassNotFoundException e) {
+                                // nada
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (controller.configurationSource.getConfigurationEntry("scheduleTests").toLowerCase() == "true") {
+            // TODO figure out how to stop tests from running
+        }
     }
 
     /**
@@ -81,6 +130,7 @@ public class TestExecutionExtension implements TestExecutionListener {
      */
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
+        System.out.println(")( executionStarted");
 
     }
 
