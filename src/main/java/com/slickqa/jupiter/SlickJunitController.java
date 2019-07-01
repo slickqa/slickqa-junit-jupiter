@@ -340,6 +340,9 @@ public class SlickJunitController {
             result.setProject(projectReference);
             result.setTestrun(testrunReference);
             result.setTestcase(testReference);
+            if(testcase != null && testcase.getComponent() != null) {
+                result.setComponent(testcase.getComponent());
+            }
             result.setStatus("NO_RESULT");
             result.setReason("not run yet...");
             result.setRecorded(new Date());
