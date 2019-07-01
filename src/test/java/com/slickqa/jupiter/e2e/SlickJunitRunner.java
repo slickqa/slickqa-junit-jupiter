@@ -29,8 +29,8 @@ public class SlickJunitRunner {
 
 
     public SlickJunitRunner() {
-        slick = SlickClientFactory.getSlickClient(System.getenv("SLICK_E2E_BASEURL"));
         SlickJunitControllerFactory.INSTANCE = null;
+        slick = SlickClientFactory.getSlickClient(System.getenv("SLICK_E2E_BASEURL"));
         release = "end-to-end";
         build = "latest";
         testplanName = "";
