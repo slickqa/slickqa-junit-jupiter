@@ -5,6 +5,8 @@ import com.slickqa.client.SlickClientFactory;
 import com.slickqa.client.errors.SlickError;
 import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.ConfigurationNames;
+import com.slickqa.jupiter.SlickJunitControllerFactory;
+import com.slickqa.jupiter.TestExecutionExtension;
 import org.bson.types.ObjectId;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -28,6 +30,7 @@ public class SlickJunitRunner {
 
 
     public SlickJunitRunner() {
+        SlickJunitControllerFactory.INSTANCE = null;
         slick = SlickClientFactory.getSlickClient(System.getenv("SLICK_E2E_BASEURL"));
         release = "end-to-end";
         build = "latest";

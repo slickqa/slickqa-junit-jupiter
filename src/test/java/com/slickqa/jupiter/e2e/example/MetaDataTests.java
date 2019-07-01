@@ -1,11 +1,12 @@
 package com.slickqa.jupiter.e2e.example;
 
+import com.slickqa.jupiter.SlickBaseTest;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.annotations.Step;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class MetaDataTests {
+public class MetaDataTests extends SlickBaseTest {
 
     @Test
     @DisplayName("DisplayName Only Test")
