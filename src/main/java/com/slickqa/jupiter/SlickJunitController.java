@@ -185,12 +185,11 @@ public class SlickJunitController {
         return automationId;
     }
 
-    public void addResultFor(Method testDescription) throws SlickError {
+    public void addResultFor(Method testDescription, String automationId) throws SlickError {
         if (isUsingSlick()) {
             SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
             boolean hasMetaData = metaData != null;
 
-            String automationId = getAutomationId(testDescription);
             Testcase testcase = null;
 
             HashMap<String, String> query = new HashMap<>();
@@ -359,22 +358,17 @@ public class SlickJunitController {
         }
     }
 
-    public Result getResultFor(Method testDescription) {
-        String automationId = getAutomationId(testDescription);
-        if(results.containsKey(automationId)) {
-            return results.get(automationId);
-        } else {
-            return null;
-        }
+    public Result getResultFor(String automationId) {
+        return results.getOrDefault(automationId, null);
     }
 
-    public Result getOrCreateResultFor(Method testDescription) {
+    public Result getOrCreateResultFor(Method testDescription, String automationId) {
         if(isUsingSlick()) {
-            Result result = getResultFor(testDescription);
+            Result result = getResultFor(automationId);
             if(result == null) {
                 try {
-                    addResultFor(testDescription);
-                    return getResultFor(testDescription);
+                    addResultFor(testDescription, automationId);
+                    return getResultFor(automationId);
                 } catch (SlickError e) {
                     e.printStackTrace();
                     System.err.println("!!!! ERROR creating slick result for " + testDescription.getName() + " !!!!");

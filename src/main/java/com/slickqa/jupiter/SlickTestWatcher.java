@@ -68,11 +68,9 @@ public class SlickTestWatcher implements TestWatcher{
         if (isUsingSlick()) {
             logger.get().debug("Test PASSED.  Reporting to slick");
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
-            Method testMethod = null;
             Optional<Method> testOptional = context.getTestMethod();
             if (testOptional.isPresent()) {
-                testMethod = testOptional.get();
-                Result result = controller.getResultFor(testMethod);
+                Result result = controller.getResultFor(context.getUniqueId());
                 Result update = new Result();
                 update.setFinished(new Date());
                 update.setStatus(PASS);
@@ -126,7 +124,7 @@ public class SlickTestWatcher implements TestWatcher{
                     logger.get().error(cause.toString());
                     logger.get().error(Arrays.toString(cause.getStackTrace()).replace(" ", "\r\n"));
                 }
-                Result result = controller.getResultFor(testMethod);
+                Result result = controller.getResultFor(context.getUniqueId());
                 if (result != null) {
                     log().flushLogs();
                     Result update = new Result();

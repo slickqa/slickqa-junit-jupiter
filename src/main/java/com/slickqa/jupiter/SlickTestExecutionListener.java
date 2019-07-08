@@ -43,6 +43,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                 for (TestIdentifier h : testPlan.getChildren(child.getUniqueId())) {
                     System.out.println(h.getUniqueId() + " is a container: " + h.isContainer());
                     if (!h.isContainer()) {
+                        String automationID = h.getUniqueId();
                         Optional<TestSource> sourceOptional = h.getSource();
                         if (sourceOptional.isPresent()) {
                             TestSource source = sourceOptional.get();
@@ -53,7 +54,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                                 try {
                                     Method testMethod = clazz.getMethod(methodName);
                                     if (!testMethod.isAnnotationPresent(Disabled.class)) {
-                                        controller.getOrCreateResultFor(testMethod);
+                                        controller.getOrCreateResultFor(testMethod, automationID);
                                     }
                                 } catch (NoSuchMethodException e) {
                                     // nada
