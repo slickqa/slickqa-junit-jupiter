@@ -11,8 +11,6 @@ import com.slickqa.client.impl.JsonUtil;
 import com.slickqa.client.model.*;
 import com.slickqa.jupiter.annotations.SlickMetaData;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.*;
 //import org.junit.runner.Description;
 
 import java.lang.reflect.Method;
@@ -168,7 +166,7 @@ public class SlickJunitController {
         }
     }
 
-    public String getAutomationId(Method testDescription) {
+    public String getAutomationIdFromSlickMetaData(Method testDescription) {
         String automationId = null;
         try {
             SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
@@ -178,18 +176,19 @@ public class SlickJunitController {
         } catch (RuntimeException e) {
             // ignore
         }
-        if(automationId == null) {
-            automationId = testDescription.getDeclaringClass().getName() + ":" + testDescription.getName();
-        }
 
         return automationId;
     }
 
-    public void addResultFor(Method testDescription, String automationId) throws SlickError {
+    public void addResultFor(Method testDescription, String uniqueID) throws SlickError {
         if (isUsingSlick()) {
             SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
             boolean hasMetaData = metaData != null;
 
+            String automationId = getAutomationIdFromSlickMetaData(testDescription);
+            if(automationId == null) {
+                automationId = uniqueID;
+            }
             Testcase testcase = null;
 
             HashMap<String, String> query = new HashMap<>();
@@ -362,13 +361,13 @@ public class SlickJunitController {
         return results.getOrDefault(automationId, null);
     }
 
-    public Result getOrCreateResultFor(Method testDescription, String automationId) {
+    public Result getOrCreateResultFor(Method testDescription, String uniqueID) {
         if(isUsingSlick()) {
-            Result result = getResultFor(automationId);
+            Result result = getResultFor(uniqueID);
             if(result == null) {
                 try {
-                    addResultFor(testDescription, automationId);
-                    return getResultFor(automationId);
+                    addResultFor(testDescription, uniqueID);
+                    return getResultFor(uniqueID);
                 } catch (SlickError e) {
                     e.printStackTrace();
                     System.err.println("!!!! ERROR creating slick result for " + testDescription.getName() + " !!!!");
