@@ -36,10 +36,10 @@ public class SlickTestWatcher implements TestWatcher{
         logger.set(new SlickResultLogger(controller));
     }
 
-    public boolean isUsingSlick() {
+    private boolean isUsingSlick() {
         boolean retval = false;
 
-        if(controller != null && controller.isUsingSlick()) {
+        if(controller != null && SlickJunitController.isUsingSlick()) {
             retval = true;
         }
 
@@ -150,12 +150,27 @@ public class SlickTestWatcher implements TestWatcher{
                         err.printStackTrace();
                         System.err.println("!! ERROR: Unable to update slick result with a fail status!!");
                     }
+                    SlickMetaData metaData = testMethod.getAnnotation(SlickMetaData.class);
+                    if(metaData != null && metaData.triageNote() != null && !"".equals(metaData.triageNote())) {
+                        log().debug(metaData.triageNote());
+
+                        LogEntry triageNoteEntry = new LogEntry();
+                        triageNoteEntry.setLoggerName("slick.note");
+                        triageNoteEntry.setLevel("WARN");
+                        triageNoteEntry.setEntryTime(new Date());
+                        triageNoteEntry.setMessage(metaData.triageNote());
+
+                        SlickResultLogger triageLogger = new SlickResultLogger(controller);
+                        triageLogger.setLoggerName("slick.note");
+                        triageLogger.addLogEntry(triageNoteEntry);
+                        triageLogger.flushLogs();
+                    }
                 }
             }
         }
     }
 
-    public SlickLogger log() {
+    private SlickLogger log() {
         return logger.get();
     }
 }
