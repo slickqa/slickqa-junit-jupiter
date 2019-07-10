@@ -10,7 +10,6 @@ import com.slickqa.jupiter.e2e.example.MetaDataTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
 import java.util.List;

@@ -36,10 +36,10 @@ public class SlickTestWatcher implements TestWatcher{
         logger.set(new SlickResultLogger(controller));
     }
 
-    public boolean isUsingSlick() {
+    private boolean isUsingSlick() {
         boolean retval = false;
 
-        if(controller != null && controller.isUsingSlick()) {
+        if(controller != null && SlickJunitController.isUsingSlick()) {
             retval = true;
         }
 
@@ -156,7 +156,6 @@ public class SlickTestWatcher implements TestWatcher{
                     if(metaData != null && metaData.triageNote() != null && !"".equals(metaData.triageNote())) {
                         log().debug(metaData.triageNote());
 
-                        String triageNote = metaData.triageNote();
                         LogEntry triageNoteEntry = new LogEntry();
                         triageNoteEntry.setLoggerName("slick.note");
                         triageNoteEntry.setLevel("WARN");
@@ -167,14 +166,13 @@ public class SlickTestWatcher implements TestWatcher{
                         triageLogger.setLoggerName("slick.note");
                         triageLogger.addLogEntry(triageNoteEntry);
                         triageLogger.flushLogs();
-
                     }
                 }
             }
         }
     }
 
-    public SlickLogger log() {
+    private SlickLogger log() {
         return logger.get();
     }
 }
