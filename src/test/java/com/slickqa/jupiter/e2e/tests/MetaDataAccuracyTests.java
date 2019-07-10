@@ -10,6 +10,7 @@ import com.slickqa.jupiter.e2e.example.MetaDataTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -146,5 +147,22 @@ public class MetaDataAccuracyTests {
         assertEquals(info.automationKey(), result.getTestcase().getAutomationKey(), "AutomationKey of test should come from SlickMetaData");
     }
 
-    //TODO: create triageNote test
+    @Test
+    @DisplayName("TriageNote from SlickMetaData")
+    public void testTriageNoteFromSlickMetaData() throws Exception {
+        Method test = MetaDataTests.class.getMethod("testTriageNote");
+        Result result = util.runTestMethod(test);
+        assertNotNull(result, "The result from slick should not be null");
+        SlickMetaData info = test.getDeclaredAnnotation(SlickMetaData.class);
+        LogEntry triageNote = null;
+        for (LogEntry l: result.getLog()
+             ) {
+            if ("slick.note".equals(l.getLoggerName())){
+                triageNote = l;
+                break;
+            }
+        }
+        assertNotNull(triageNote, "Didn't find a triage note on result");
+        assertEquals(triageNote.getMessage(), "Yomama");
+    }
 }

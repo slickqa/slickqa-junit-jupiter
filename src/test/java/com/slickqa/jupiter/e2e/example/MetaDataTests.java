@@ -52,7 +52,7 @@ public class MetaDataTests extends SlickBaseTest {
             steps = {},
             triageNote = "Yomama"
     )
-    public void triageNoteTest() {
+    public void testTriageNote() {
         assertTrue(false, "This will cause a triage note to be applied");
     }
 
