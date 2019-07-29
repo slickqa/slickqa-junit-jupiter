@@ -219,7 +219,8 @@ public class SlickJunitController {
                 testcase = new Testcase();
                 newTestcase = true;
             }
-            if (hasMetaData) {
+
+            if (hasMetaData && !"".equals(metaData.title())) {
                 testcase.setName(metaData.title());
             } else {
                 if (testDescription.isAnnotationPresent(DisplayName.class)) {

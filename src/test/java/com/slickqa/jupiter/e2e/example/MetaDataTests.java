@@ -42,6 +42,12 @@ public class MetaDataTests extends SlickBaseTest {
     }
 
     @Test
+    @SlickMetaData()
+    @DisplayName("Name from DisplayName")
+    public void testDisplayNameEmptyMetadataName() {
+    }
+
+    @Test
     public void testMethodNameOnly() {
     }
 

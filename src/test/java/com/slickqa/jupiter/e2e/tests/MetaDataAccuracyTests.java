@@ -57,6 +57,18 @@ public class MetaDataAccuracyTests {
     }
 
     @Test
+    @DisplayName("Test name comes from DisplayName when SlickMetaData title is empty.")
+    public void testNameComesFromDisplayNameWhenSlickMetaDataIsEmpty() throws Exception {
+        Method test = MetaDataTests.class.getMethod("testDisplayNameEmptyMetadataName");
+        SlickMetaData info = test.getDeclaredAnnotation(SlickMetaData.class);
+        assertEquals("", info.title(), "The title in SlickMetaData should be empty (default).  If this is not true then somebody messed up the test.");
+        Result result = util.runTestMethod(test);
+        assertNotNull(result, "The result from slick should not be null");
+        DisplayName displayName = test.getDeclaredAnnotation(DisplayName.class);
+        assertEquals(displayName.value(), result.getTestcase().getName(), "name of the test should come from DisplayName as SlickMetaData's title is empty");
+    }
+
+    @Test
     @DisplayName("Test name comes from method name when no annotation is present")
     public void testNameComesFromMethodNameWhenNoAnnotationIsPresent() throws Exception {
         Method test = MetaDataTests.class.getMethod("testMethodNameOnly");
