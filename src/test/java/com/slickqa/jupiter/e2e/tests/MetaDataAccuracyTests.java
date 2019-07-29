@@ -74,7 +74,16 @@ public class MetaDataAccuracyTests {
         Method test = MetaDataTests.class.getMethod("testMethodNameOnly");
         Result result = util.runTestMethod(test);
         assertNotNull(result, "The result from slick should not be null");
-        assertEquals(test.getName(), result.getTestcase().getName(), "name of test should come from the method name");
+        assertEquals(test.getName() + "()", result.getTestcase().getName(), "name of test should come from the method name");
+    }
+
+    @Test
+    @DisplayName("Test that the templated name is given to slick")
+    public void testTemplatedName() throws Exception {
+        Method test = MetaDataTests.class.getMethod("testTemplatedName", String.class);
+        Result result = util.runTestMethod(test);
+        assertNotNull(result, "The result from slick should not be null");
+        assertEquals("Test Yomama", result.getTestcase().getName(), "name should be the templated name.");
     }
 
     @Test

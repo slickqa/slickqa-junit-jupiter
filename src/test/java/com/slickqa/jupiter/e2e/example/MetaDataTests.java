@@ -5,7 +5,10 @@ import com.slickqa.jupiter.annotations.SlickMetaData;
 import com.slickqa.jupiter.annotations.Step;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MetaDataTests extends SlickBaseTest {
@@ -60,6 +63,11 @@ public class MetaDataTests extends SlickBaseTest {
     )
     public void testTriageNote() {
         assertTrue(false, "This will cause a triage note to be applied");
+    }
+
+    @ParameterizedTest(name="Test {0}")
+    @ValueSource(strings={"Yomama"})
+    public void testTemplatedName(String parameter) {
     }
 
 }

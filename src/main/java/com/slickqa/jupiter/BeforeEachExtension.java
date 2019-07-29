@@ -39,7 +39,7 @@ public class BeforeEachExtension implements BeforeEachCallback {
             if (context.getTestMethod().isPresent()) {
                 Method testMethod = context.getTestMethod().get();
                 //System.out.println(MessageFormat.format("Test found: {0}", testMethod.getName()));
-                Result result = controller.getOrCreateResultFor(testMethod, context.getUniqueId());
+                Result result = controller.getOrCreateResultFor(testMethod, context.getUniqueId(), context.getDisplayName());
                 Result update = new Result();
                 update.setStarted(new Date());
                 update.setReason("");
