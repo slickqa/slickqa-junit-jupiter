@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * This should be applied only to @Test methods.
- * SlickMetaData will be used to create Results
+ * TestCaseInfo will be used to create Results
  */
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.METHOD )
-public @interface SlickMetaData {
+public @interface TestCaseInfo {
     String empty = "";
 
     String title() default empty;

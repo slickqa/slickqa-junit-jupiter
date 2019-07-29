@@ -1,17 +1,16 @@
 package com.slickqa.jupiter.e2e.example;
 
 import com.slickqa.jupiter.SlickBaseTest;
-import com.slickqa.jupiter.annotations.SlickMetaData;
+import com.slickqa.jupiter.annotations.TestCaseInfo;
 import com.slickqa.jupiter.annotations.Step;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MetaDataTests extends SlickBaseTest {
+public class TestCaseInfoTests extends SlickBaseTest {
 
     @Test
     @DisplayName("DisplayName Only Test")
@@ -19,9 +18,9 @@ public class MetaDataTests extends SlickBaseTest {
     }
 
     @Test
-    @SlickMetaData(
-            title = "SlickMetaData Only Test",
-            purpose = "Test if SlickMetaData annotations provide data to plugin.",
+    @TestCaseInfo(
+            title = "TestCaseInfo Only Test",
+            purpose = "Test if TestCaseInfo annotations provide data to plugin.",
             steps = {
                     @Step(step = "First Step", expectation = "With expectation"),
                     @Step(step = "Second Step")
@@ -32,22 +31,22 @@ public class MetaDataTests extends SlickBaseTest {
             automationId = "UniqueAutomationIdForThisTest",
             automationKey = "AutomationKey"
     )
-    public void testSlickMetaData() {
+    public void testTestcaseInfo() {
     }
 
     @Test
-    @SlickMetaData(
-            title = "SlickMetaData and DisplayName test",
+    @TestCaseInfo(
+            title = "TestCaseInfo and DisplayName test",
             steps = {}
     )
     @DisplayName("Junit only test name")
-    public void testDisplayNameAndSlickMetaData() {
+    public void testDisplayNameAndTestcaseInfo() {
     }
 
     @Test
-    @SlickMetaData()
+    @TestCaseInfo()
     @DisplayName("Name from DisplayName")
-    public void testDisplayNameEmptyMetadataName() {
+    public void testDisplayNameEmptyTestcaseInfoName() {
     }
 
     @Test
@@ -56,7 +55,7 @@ public class MetaDataTests extends SlickBaseTest {
 
 
     @Test
-    @SlickMetaData(
+    @TestCaseInfo(
             title = "Test of Triage Note",
             steps = {},
             triageNote = "Yomama"
