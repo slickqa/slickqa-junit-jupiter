@@ -12,15 +12,15 @@ import java.lang.annotation.Target;
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.METHOD )
 public @interface SlickMetaData {
-    String value = "";
+    String empty = "";
 
-    String title();
-    String purpose() default value;
-    String component() default value;
-    String feature() default value;
-    String automationId() default value;
-    String automationKey() default value;
-    Step[] steps();
-    String triageNote() default value;
-    String author() default value;
+    String title() default empty;
+    String purpose() default empty;
+    String component() default empty;
+    String feature() default empty;
+    String automationId() default empty;
+    String automationKey() default empty;
+    Step[] steps() default {};
+    String triageNote() default empty;
+    String author() default empty;
 }

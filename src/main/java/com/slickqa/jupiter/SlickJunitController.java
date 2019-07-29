@@ -180,7 +180,7 @@ public class SlickJunitController {
         return automationId;
     }
 
-    public void addResultFor(Method testDescription, String uniqueID) throws SlickError {
+    public void addResultFor(Method testDescription, String uniqueID, String displayName) throws SlickError {
         if (isUsingSlick()) {
             SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
             boolean hasMetaData = metaData != null;
@@ -219,14 +219,11 @@ public class SlickJunitController {
                 testcase = new Testcase();
                 newTestcase = true;
             }
-            if (hasMetaData) {
+
+            if (hasMetaData && !"".equals(metaData.title())) {
                 testcase.setName(metaData.title());
             } else {
-                if (testDescription.isAnnotationPresent(DisplayName.class)) {
-                    testcase.setName(testDescription.getAnnotation(DisplayName.class).value());
-                } else {
-                    testcase.setName(testDescription.getName());
-                }
+                testcase.setName(displayName);
             }
             testcase.setProject(projectReference);
             if (newTestcase) {
@@ -361,12 +358,12 @@ public class SlickJunitController {
         return results.getOrDefault(automationId, null);
     }
 
-    public Result getOrCreateResultFor(Method testDescription, String uniqueID) {
+    public Result getOrCreateResultFor(Method testDescription, String uniqueID, String displayName) {
         if(isUsingSlick()) {
             Result result = getResultFor(uniqueID);
             if(result == null) {
                 try {
-                    addResultFor(testDescription, uniqueID);
+                    addResultFor(testDescription, uniqueID, displayName);
                     return getResultFor(uniqueID);
                 } catch (SlickError e) {
                     e.printStackTrace();

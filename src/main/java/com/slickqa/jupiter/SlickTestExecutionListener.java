@@ -54,7 +54,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                                 try {
                                     Method testMethod = clazz.getMethod(methodName);
                                     if (!testMethod.isAnnotationPresent(Disabled.class)) {
-                                        controller.getOrCreateResultFor(testMethod, automationID);
+                                        controller.getOrCreateResultFor(testMethod, automationID, h.getDisplayName());
                                     }
                                 } catch (NoSuchMethodException e) {
                                     // nada
