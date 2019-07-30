@@ -4,12 +4,11 @@ import com.slickqa.client.errors.SlickError;
 import com.slickqa.client.model.LogEntry;
 import com.slickqa.client.model.Result;
 import com.slickqa.jupiter.annotations.SlickLogger;
-import com.slickqa.jupiter.annotations.SlickMetaData;
+import com.slickqa.jupiter.annotations.TestCaseInfo;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.*;
 import org.junit.jupiter.api.extension.TestWatcher;
 
-import javax.swing.text.html.Option;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -150,15 +149,15 @@ public class SlickTestWatcher implements TestWatcher{
                         err.printStackTrace();
                         System.err.println("!! ERROR: Unable to update slick result with a fail status!!");
                     }
-                    SlickMetaData metaData = testMethod.getAnnotation(SlickMetaData.class);
-                    if(metaData != null && metaData.triageNote() != null && !"".equals(metaData.triageNote())) {
-                        log().debug(metaData.triageNote());
+                    TestCaseInfo testInfo = testMethod.getAnnotation(TestCaseInfo.class);
+                    if(testInfo != null && testInfo.triageNote() != null && !"".equals(testInfo.triageNote())) {
+                        log().debug(testInfo.triageNote());
 
                         LogEntry triageNoteEntry = new LogEntry();
                         triageNoteEntry.setLoggerName("slick.note");
                         triageNoteEntry.setLevel("WARN");
                         triageNoteEntry.setEntryTime(new Date());
-                        triageNoteEntry.setMessage(metaData.triageNote());
+                        triageNoteEntry.setMessage(testInfo.triageNote());
 
                         SlickResultLogger triageLogger = new SlickResultLogger(controller);
                         triageLogger.setLoggerName("slick.note");

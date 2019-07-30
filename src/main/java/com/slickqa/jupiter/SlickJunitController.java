@@ -9,8 +9,7 @@ import com.slickqa.client.SlickClientFactory;
 import com.slickqa.client.errors.SlickError;
 import com.slickqa.client.impl.JsonUtil;
 import com.slickqa.client.model.*;
-import com.slickqa.jupiter.annotations.SlickMetaData;
-import org.junit.jupiter.api.DisplayName;
+import com.slickqa.jupiter.annotations.TestCaseInfo;
 //import org.junit.runner.Description;
 
 import java.lang.reflect.Method;
@@ -166,12 +165,12 @@ public class SlickJunitController {
         }
     }
 
-    public String getAutomationIdFromSlickMetaData(Method testDescription) {
+    public String getAutomationIdFromTestCaseInfo(Method testDescription) {
         String automationId = null;
         try {
-            SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
-            if(metaData != null && metaData.automationId() != null && !"".equals(metaData.automationId())) {
-                automationId = metaData.automationId();
+            TestCaseInfo testCaseInfo = testDescription.getAnnotation(TestCaseInfo.class);
+            if(testCaseInfo != null && testCaseInfo.automationId() != null && !"".equals(testCaseInfo.automationId())) {
+                automationId = testCaseInfo.automationId();
             }
         } catch (RuntimeException e) {
             // ignore
@@ -182,10 +181,10 @@ public class SlickJunitController {
 
     public void addResultFor(Method testDescription, String uniqueID, String displayName) throws SlickError {
         if (isUsingSlick()) {
-            SlickMetaData metaData = testDescription.getAnnotation(SlickMetaData.class);
-            boolean hasMetaData = metaData != null;
+            TestCaseInfo testCaseInfo = testDescription.getAnnotation(TestCaseInfo.class);
+            boolean hasTestCaseInfo = testCaseInfo != null;
 
-            String automationId = getAutomationIdFromSlickMetaData(testDescription);
+            String automationId = getAutomationIdFromTestCaseInfo(testDescription);
             if(automationId == null) {
                 automationId = uniqueID;
             }
@@ -203,9 +202,9 @@ public class SlickJunitController {
                 if (testcases != null && testcases.size() > 0) {
                     testcase = testcases.get(0);
                     // update author if needed
-                    if (hasMetaData) {
-                        if (!metaData.author().equals("") && !metaData.author().equals(testcase.getAuthor())) {
-                            testcase.setAuthor(metaData.author());
+                    if (hasTestCaseInfo) {
+                        if (!testCaseInfo.author().equals("") && !testCaseInfo.author().equals(testcase.getAuthor())) {
+                            testcase.setAuthor(testCaseInfo.author());
                             getSlickClient().testcase(testcase.getId()).update(testcase);
                         }
                     }
@@ -220,8 +219,8 @@ public class SlickJunitController {
                 newTestcase = true;
             }
 
-            if (hasMetaData && !"".equals(metaData.title())) {
-                testcase.setName(metaData.title());
+            if (hasTestCaseInfo && !"".equals(testCaseInfo.title())) {
+                testcase.setName(testCaseInfo.title());
             } else {
                 testcase.setName(displayName);
             }
@@ -234,17 +233,17 @@ public class SlickJunitController {
             testcase.setAutomated(true);
             testcase.setAutomationId(automationId);
             testcase.setAutomationTool("junit_5");
-            if (hasMetaData) {
-                testcase.setAutomationKey(getValueOrNullIfEmpty(metaData.automationKey()));
-                testcase.setPurpose(metaData.purpose());
+            if (hasTestCaseInfo) {
+                testcase.setAutomationKey(getValueOrNullIfEmpty(testCaseInfo.automationKey()));
+                testcase.setPurpose(testCaseInfo.purpose());
                 ComponentReference componentReference = null;
                 Component component = null;
-                if (metaData.component() != null && !"".equals(metaData.component())) {
+                if (testCaseInfo.component() != null && !"".equals(testCaseInfo.component())) {
                     componentReference = new ComponentReference();
-                    componentReference.setName(metaData.component());
+                    componentReference.setName(testCaseInfo.component());
                     if (project.getComponents() != null) {
                         for (Component possible : project.getComponents()) {
-                            if (metaData.component().equals(possible.getName())) {
+                            if (testCaseInfo.component().equals(possible.getName())) {
                                 componentReference.setId(possible.getId());
                                 componentReference.setCode(possible.getCode());
                                 component = possible;
@@ -254,7 +253,7 @@ public class SlickJunitController {
                     }
                     if (componentReference.getId() == null) {
                         component = new Component();
-                        component.setName(metaData.component());
+                        component.setName(testCaseInfo.component());
                         try {
                             component = slickClient.project(project.getId()).components().create(component);
                             componentReference.setId(component.getId());
@@ -267,13 +266,13 @@ public class SlickJunitController {
                 }
                 testcase.setComponent(componentReference);
                 FeatureReference featureReference = null;
-                if (metaData.feature() != null && !"".equals(metaData.feature()) && component != null) {
+                if (testCaseInfo.feature() != null && !"".equals(testCaseInfo.feature()) && component != null) {
                     featureReference = new FeatureReference();
-                    featureReference.setName(metaData.feature());
+                    featureReference.setName(testCaseInfo.feature());
                     Feature feature = null;
                     if (component.getFeatures() != null) {
                         for (Feature possible : component.getFeatures()) {
-                            if (metaData.feature().equals(possible.getName())) {
+                            if (testCaseInfo.feature().equals(possible.getName())) {
                                 featureReference.setId(possible.getId());
                                 feature = possible;
                                 break;
@@ -282,7 +281,7 @@ public class SlickJunitController {
                     }
                     if (feature == null) {
                         feature = new Feature();
-                        feature.setName(metaData.feature());
+                        feature.setName(testCaseInfo.feature());
                         if (component.getFeatures() == null) {
                             component.setFeatures(new ArrayList<Feature>(1));
                         }
@@ -292,7 +291,7 @@ public class SlickJunitController {
                             project = slickClient.project(project.getId()).get();
                             if (component.getFeatures() != null) {
                                 for (Feature possible : component.getFeatures()) {
-                                    if (metaData.feature().equals(possible.getName())) {
+                                    if (testCaseInfo.feature().equals(possible.getName())) {
                                         featureReference.setId(feature.getId());
                                     }
                                 }
@@ -308,12 +307,12 @@ public class SlickJunitController {
                         }
                     }
                     testcase.setFeature(featureReference);
-                    if (metaData.steps() != null && metaData.steps().length > 0) {
-                        testcase.setSteps(new ArrayList<Step>(metaData.steps().length));
-                        for (com.slickqa.jupiter.annotations.Step metaStep : metaData.steps()) {
+                    if (testCaseInfo.steps() != null && testCaseInfo.steps().length > 0) {
+                        testcase.setSteps(new ArrayList<Step>(testCaseInfo.steps().length));
+                        for (com.slickqa.jupiter.annotations.Step testStep : testCaseInfo.steps()) {
                             Step slickStep = new Step();
-                            slickStep.setName(metaStep.step());
-                            slickStep.setExpectedResult(metaStep.expectation());
+                            slickStep.setName(testStep.step());
+                            slickStep.setExpectedResult(testStep.expectation());
                             testcase.getSteps().add(slickStep);
                         }
                     }

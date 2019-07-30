@@ -1,7 +1,7 @@
 package com.slickqa.jupiter.e2e.example;
 
 import com.slickqa.jupiter.SlickBaseTest;
-import com.slickqa.jupiter.annotations.SlickMetaData;
+import com.slickqa.jupiter.annotations.TestCaseInfo;
 import com.slickqa.jupiter.annotations.Step;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -16,8 +16,8 @@ public class ExampleTestTwo extends SlickBaseTest {
 
 
     @Test
-    @DisplayName("With SlickMetaData pass test")
-    @SlickMetaData(title = "Example pass test in metadata",
+    @DisplayName("With TestCaseInfo pass test")
+    @TestCaseInfo(title = "Example pass test in test case info",
             purpose = "Example test that passes",
             component = "slick-junit5",
             feature = "Example pass test feature",
@@ -29,13 +29,13 @@ public class ExampleTestTwo extends SlickBaseTest {
             triageNote = "pass test triage note"
     )
 
-    public void testNoSlickMetaDataNoDisplayName() throws Exception {
+    public void testNoTestCaseInfoNoDisplayName() throws Exception {
         Assertions.assertTrue(true);
     }
 
     @Test
-    @SlickMetaData(title = "Fail with SlickMetaData and DisplayName",
-            purpose = "Slick metadata takes precedence",
+    @TestCaseInfo(title = "Fail with TestCaseInfo and DisplayName",
+            purpose = "Slick test info takes precedence",
             component = "slick-junit5",
             feature = "Testwatcher",
             steps = {
@@ -46,7 +46,7 @@ public class ExampleTestTwo extends SlickBaseTest {
             triageNote = "pass test triage note"
     )
     @DisplayName("This title should not show in slick")
-    public void testBothSlickMetaDataAndDisplayName() throws Exception {
+    public void testBothTestCaseInfoAndDisplayName() throws Exception {
         Assertions.assertTrue(true);
     }
 
@@ -69,7 +69,7 @@ public class ExampleTestTwo extends SlickBaseTest {
     }
 
     @Test
-    public void examplePassNoSlickMetaDataOrDisplayNameTest() throws Exception {
+    public void examplePassNoTestCaseInfoOrDisplayNameTest() throws Exception {
     }
 
     @Test
@@ -81,7 +81,7 @@ public class ExampleTestTwo extends SlickBaseTest {
         });
     }
 
-    @SlickMetaData(
+    @TestCaseInfo(
             title = "Simple example of a passing test",
             steps = {
             }
