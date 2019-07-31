@@ -16,8 +16,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /*
- * Common class used by both the SlickTestWatcher (sends final test result after a test is run) and the
- * SchedulingExecutionCondition used for initially sending results to slick.  This class will initialize the slick
+ * Common class used by SlickTestWatcher (sends final test result after a test is run)
+ * This class will initialize the slick
  * client, create the testrun in slick, and will hold a mapping of junit tests to slick results.  The test writer will
  * not likely have to interact with this class unless they want to customize the process by extending.
  */
@@ -138,6 +138,11 @@ public class SlickJunitController {
                     testrun.setProject(projectReference);
                     testrun.setRelease(releaseReference);
                     testrun.setBuild(buildReference);
+                    if(configurationSource.getConfigurationEntry(ConfigurationNames.SCHEDULE_TEST_MODE, "false").equalsIgnoreCase("true")) {
+                        HashMap<String, String> testrunAttrs = new HashMap<>();
+                        testrunAttrs.put("scheduled", "true");
+                        testrun.setAttributes(testrunAttrs);
+                    }
                     testrun = slickClient.testruns().create(testrun);
                 }
 
@@ -337,7 +342,16 @@ public class SlickJunitController {
             if(testcase != null && testcase.getComponent() != null) {
                 result.setComponent(testcase.getComponent());
             }
+
+            HashMap<String, String> attrs = DefaultAttributes.getAttributesFromEnvironment();
+
             result.setStatus("NO_RESULT");
+            if(configurationSource.getConfigurationEntry(ConfigurationNames.SCHEDULE_TEST_MODE, "false").equalsIgnoreCase("true")) {
+                result.setRunstatus("SCHEDULED");
+                attrs.put("scheduled", "true");
+            }
+            result.setAttributes(attrs);
+
             result.setReason("not run yet...");
             result.setRecorded(new Date());
             result = slickClient.results().create(result);
@@ -377,6 +391,9 @@ public class SlickJunitController {
         }
     }
 
+    public SlickConfigurationSource getConfigurationSource() {
+        return configurationSource;
+    }
 
     /*public void createSuiteResults(ArrayList<Description> children) {
         if(isUsingSlick()) {

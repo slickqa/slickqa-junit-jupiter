@@ -58,6 +58,17 @@ public class SlickJunitRunner {
         return slick.results(query).getList();
     }
 
+    public List<Result> runDataDrivenTestMethod(Method method, boolean setSystemProperties) throws SlickError {
+        if(testplanName == null || testplanName.equals("")) {
+            testplanName="Method: " + method.getDeclaringClass().getName() + ":" + method.getName();
+        }
+        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                .selectors(
+                        selectMethod(method.getDeclaringClass(), method)
+                ).build();
+        return runTests(request, setSystemProperties);
+    }
+
     public Result runTestMethod(Method method, boolean setSystemProperties) throws SlickError {
         if(testplanName == null || testplanName.equals("")) {
             testplanName="Method: " + method.getDeclaringClass().getName() + ":" + method.getName();

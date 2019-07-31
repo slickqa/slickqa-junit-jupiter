@@ -26,6 +26,39 @@ public class SlickTestExecutionListener implements TestExecutionListener {
         return retval;
     }
 
+    protected void fileResultsFor(TestPlan testPlan, TestIdentifier test) {
+        SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+        if(test.isContainer()) {
+            System.out.println("Found container: " + test.getUniqueId());
+            for(TestIdentifier child : testPlan.getChildren(test.getUniqueId())) {
+                fileResultsFor(testPlan, child);
+            }
+        } else {
+            String automationID = test.getUniqueId();
+            Optional<TestSource> sourceOptional = test.getSource();
+            if (sourceOptional.isPresent()) {
+                TestSource source = sourceOptional.get();
+                String className = ((MethodSource) source).getClassName();
+                String methodName = ((MethodSource) source).getMethodName();
+                try {
+                    Class<?> clazz = Class.forName(className);
+                    try {
+                        Method testMethod = clazz.getMethod(methodName);
+                        if (!testMethod.isAnnotationPresent(Disabled.class)) {
+                            System.out.println("Creating result for " + automationID);
+                            controller.getOrCreateResultFor(testMethod, automationID, test.getDisplayName());
+                        }
+                    } catch (NoSuchMethodException e) {
+                        // nada
+                    }
+                } catch (ClassNotFoundException e) {
+                    // nada
+                }
+            }
+
+        }
+    }
+
     /**
      * Called when the execution of the {@link TestPlan} has started,
      * <em>before</em> any test has been executed.
@@ -39,35 +72,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
         if (isUsingSlick(controller)) {
             Set<TestIdentifier> testRoot = testPlan.getChildren("[engine:junit-jupiter]");
             for (TestIdentifier child : testRoot) {
-                System.out.println(child.getUniqueId() + " is a container: " + child.isContainer());
-                for (TestIdentifier h : testPlan.getChildren(child.getUniqueId())) {
-                    System.out.println(h.getUniqueId() + " is a container: " + h.isContainer());
-                    if (!h.isContainer()) {
-                        String automationID = h.getUniqueId();
-                        Optional<TestSource> sourceOptional = h.getSource();
-                        if (sourceOptional.isPresent()) {
-                            TestSource source = sourceOptional.get();
-                            String className = ((MethodSource) source).getClassName();
-                            String methodName = ((MethodSource) source).getMethodName();
-                            try {
-                                Class<?> clazz = Class.forName(className);
-                                try {
-                                    Method testMethod = clazz.getMethod(methodName);
-                                    if (!testMethod.isAnnotationPresent(Disabled.class)) {
-                                        controller.getOrCreateResultFor(testMethod, automationID, h.getDisplayName());
-                                    }
-                                } catch (NoSuchMethodException e) {
-                                    // nada
-                                }
-                            } catch (ClassNotFoundException e) {
-                                // nada
-                            }
-                        }
-                    }
-                }
-            }
-            if (controller.configurationSource.getConfigurationEntry("scheduleTests", "false").toLowerCase().equals("true")) {
-                // TODO figure out how to stop tests from running
+                fileResultsFor(testPlan, child);
             }
         }
     }
@@ -94,7 +99,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
      */
     @Override
     public void dynamicTestRegistered(TestIdentifier testIdentifier) {
-
+        fileResultsFor(null, testIdentifier);
     }
 
     /**

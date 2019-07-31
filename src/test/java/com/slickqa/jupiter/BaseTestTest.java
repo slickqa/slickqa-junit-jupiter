@@ -16,7 +16,6 @@ public class BaseTestTest {
     public void testBaseTestAppliesExtensions() throws Exception {
         List<ExtendWith> extensions = AnnotationUtils.findRepeatableAnnotations(SlickBaseTest.class, ExtendWith.class);
         HashMap<Class, Boolean> foundExtensions = new HashMap<>();
-        foundExtensions.put(SchedulingExecutionCondition.class, false);
         foundExtensions.put(SlickTestWatcher.class, false);
         foundExtensions.put(BeforeEachExtension.class, false);
 
