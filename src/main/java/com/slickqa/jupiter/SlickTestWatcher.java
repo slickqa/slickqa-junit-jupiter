@@ -45,6 +45,13 @@ public class SlickTestWatcher implements TestWatcher{
         return retval;
     }
 
+    private boolean isScheduleMode() {
+        if(controller != null && controller.getConfigurationSource().getConfigurationEntry(ConfigurationNames.SCHEDULE_TEST_MODE, "false").equalsIgnoreCase("true")) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Invoked after a disabled test has been skipped.
      *
@@ -104,7 +111,7 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
-        if (isUsingSlick()) {
+        if (isUsingSlick() && !isScheduleMode()) {
             String status = BROKEN_TEST;
             Store store = context.getStore(Namespace.create(context.getUniqueId()));
             Boolean skipped = store.get("skipTest", boolean.class);

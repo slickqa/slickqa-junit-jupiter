@@ -55,4 +55,9 @@ public class ConfigurationNames {
      * then logs are printed out.
      */
     static public final String SLICK_ENABLE_LOGS = "slick.log";
+
+    /**
+     * Should we just schedule tests, not run them?
+     */
+    static public final String SCHEDULE_TEST_MODE = "slick.scheduleTests";
 }
