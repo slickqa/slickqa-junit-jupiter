@@ -7,22 +7,16 @@ import java.util.Properties;
 public class DefaultAttributes {
     protected static HashMap<String, String> attributesCache = null;
 
-    protected static Properties SystemProperties = System.getProperties();
     protected static Map<String, String> EnvironmentVariables = System.getenv();
-
-    public static void resetSystemProperties() {
-        SystemProperties = System.getProperties();
-    }
-
 
     public static HashMap<String, String> getAttributesFromEnvironment(boolean useCache) {
         if(useCache && attributesCache != null) {
             return new HashMap<>(attributesCache);
         }
         HashMap<String, String> attrs = new HashMap<>();
-        for(String name : SystemProperties.stringPropertyNames()) {
+        for(String name : System.getProperties().stringPropertyNames()) {
             if(name.startsWith("attr.")) {
-                attrs.put(name.substring(5), SystemProperties.getProperty(name));
+                attrs.put(name.substring(5), System.getProperties().getProperty(name));
             }
         }
         for(String name : EnvironmentVariables.keySet()) {

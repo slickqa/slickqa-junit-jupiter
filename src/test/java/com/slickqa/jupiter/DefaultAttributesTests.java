@@ -14,16 +14,13 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultAttributesTests {
-    Properties systemProperties;
     HashMap<String, String> environmentVariables;
     String attributeName;
     String attributeValue;
 
     @BeforeEach
     public void setup() {
-        systemProperties = new Properties(System.getProperties());
         environmentVariables = new HashMap<>(System.getenv());
-        DefaultAttributes.SystemProperties = systemProperties;
         DefaultAttributes.EnvironmentVariables = environmentVariables;
         attributeName = getUniqueAttrubuteName();
         attributeValue = getUniqueAttributeValue();
@@ -31,12 +28,14 @@ public class DefaultAttributesTests {
 
     @AfterEach
     public void cleanup() {
-        DefaultAttributes.SystemProperties = System.getProperties();
         DefaultAttributes.EnvironmentVariables = System.getenv();
+        if(System.getProperties().containsKey(attributeName)) {
+            System.getProperties().remove(attributeName);
+        }
     }
 
     public void setProperty(String name, String value) {
-        systemProperties.setProperty("attr." + name, value);
+        System.getProperties().setProperty("attr." + name, value);
     }
 
     public void setEnvironmentVariable(String name, String value) {
