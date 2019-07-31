@@ -1,6 +1,7 @@
 package com.slickqa.jupiter.e2e.tests;
 
 import com.slickqa.client.model.Result;
+import com.slickqa.jupiter.DefaultAttributes;
 import com.slickqa.jupiter.e2e.SlickJunitRunner;
 import com.slickqa.jupiter.e2e.example.ExampleTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ public class CustomAttributeE2ETests {
         String attributeName = "yomama" + (new Date()).getTime();
         String attributeValue = "value" + (new Date()).getTime();
         System.setProperty("attr." + attributeName, attributeValue);
+        DefaultAttributes.resetSystemProperties();
         Method test = ExampleTest.class.getMethod("examplePassTest");
         Result result = util.runTestMethod(test);
         assertNotNull(result, "The result from slick should not be null");

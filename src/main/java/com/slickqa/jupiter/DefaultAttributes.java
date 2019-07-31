@@ -10,6 +10,10 @@ public class DefaultAttributes {
     protected static Properties SystemProperties = System.getProperties();
     protected static Map<String, String> EnvironmentVariables = System.getenv();
 
+    public static void resetSystemProperties() {
+        SystemProperties = System.getProperties();
+    }
+
 
     public static HashMap<String, String> getAttributesFromEnvironment(boolean useCache) {
         if(useCache && attributesCache != null) {
