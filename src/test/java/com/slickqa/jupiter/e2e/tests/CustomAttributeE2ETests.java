@@ -22,6 +22,7 @@ public class CustomAttributeE2ETests {
     @BeforeEach
     public void setup() throws Exception {
         util = new SlickJunitRunner();
+        DefaultAttributes.wipeCache();
     }
 
     @Test
@@ -30,7 +31,6 @@ public class CustomAttributeE2ETests {
         String attributeName = "yomama" + (new Date()).getTime();
         String attributeValue = "value" + (new Date()).getTime();
         System.setProperty("attr." + attributeName, attributeValue);
-        DefaultAttributes.resetSystemProperties();
         Method test = ExampleTest.class.getMethod("examplePassTest");
         Result result = util.runTestMethod(test);
         assertNotNull(result, "The result from slick should not be null");
