@@ -22,6 +22,7 @@ public class CustomAttributeE2ETests {
     @BeforeEach
     public void setup() throws Exception {
         util = new SlickJunitRunner();
+        DefaultAttributes.wipeCache();
     }
 
     @Test

@@ -9,6 +9,10 @@ public class DefaultAttributes {
 
     protected static Map<String, String> EnvironmentVariables = System.getenv();
 
+    public static void wipeCache() {
+        attributesCache = null;
+    }
+
     public static HashMap<String, String> getAttributesFromEnvironment(boolean useCache) {
         if(useCache && attributesCache != null) {
             return new HashMap<>(attributesCache);
