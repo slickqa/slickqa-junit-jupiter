@@ -26,6 +26,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
         return retval;
     }
 
+
     protected void fileResultsFor(TestPlan testPlan, TestIdentifier test) {
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
         if(test.isContainer()) {
@@ -69,6 +70,10 @@ public class SlickTestExecutionListener implements TestExecutionListener {
     public void testPlanExecutionStarted(TestPlan testPlan) {
         System.out.println(")( SlickTestExecutionListener");
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+        if(SlickJunitController.singleTestMode) {
+            System.out.println("Single test mode, will not file any results from testPlan");
+            return;
+        }
         if (isUsingSlick(controller)) {
             Set<TestIdentifier> testRoot = testPlan.getChildren("[engine:junit-jupiter]");
             for (TestIdentifier child : testRoot) {
