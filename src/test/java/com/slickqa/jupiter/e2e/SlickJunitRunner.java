@@ -21,20 +21,24 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMetho
 
 public class SlickJunitRunner {
     public SlickClient slick;
+    private String slickBaseURL;
     private String project = "slickqa-junit-jupiter";
     private String release;
     private String build;
     private String testplanName;
     private String testrunId;
+    private String resultUrl;
 
 
     public SlickJunitRunner() {
         SlickJunitControllerFactory.INSTANCE = null;
-        slick = SlickClientFactory.getSlickClient(System.getenv("SLICK_E2E_BASEURL"));
+        slickBaseURL = System.getenv("SLICK_E2E_BASEURL");
+        slick = SlickClientFactory.getSlickClient(slickBaseURL);
         release = "end-to-end";
         build = "latest";
         testplanName = "";
         testrunId = ObjectId.get().toHexString();
+        resultUrl = "";
     }
 
     public void setSystemProperties() {
@@ -44,6 +48,7 @@ public class SlickJunitRunner {
         System.setProperty(ConfigurationNames.BUILD_NAME, build);
         System.setProperty(ConfigurationNames.TESTPLAN_NAME, testplanName);
         System.setProperty(ConfigurationNames.TESTRUN_ID, testrunId);
+        System.setProperty(ConfigurationNames.RESULT_URL, resultUrl);
     }
 
     public List<Result> runTests(LauncherDiscoveryRequest request, boolean setSystemProperties) throws SlickError {
@@ -118,11 +123,17 @@ public class SlickJunitRunner {
         this.testplanName = testplanName;
     }
 
-    public String getTestrunId() {
-        return testrunId;
-    }
+    public String getTestrunId() { return testrunId; }
 
     public void setTestrunId(String testrunId) {
         this.testrunId = testrunId;
     }
+
+    public String getResultUrl() { return resultUrl; }
+
+    public void setResultUrl(String resultUrl) { this.resultUrl = resultUrl; }
+
+    public String getSlickBaseURL() { return slickBaseURL; }
+
+    public void setSlickBaseURL(String slickBaseURL) { this.slickBaseURL = slickBaseURL; }
 }
