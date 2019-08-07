@@ -70,7 +70,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
     public void testPlanExecutionStarted(TestPlan testPlan) {
         System.out.println(")( SlickTestExecutionListener");
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
-        if(SlickJunitController.singleTestMode) {
+        if(controller.getSingleTestMode()) {
             System.out.println("Single test mode, will not file any results from testPlan");
             return;
         }

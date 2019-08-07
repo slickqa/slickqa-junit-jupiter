@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class SlickJunitController {
     protected static boolean usingSlick;
-    protected static boolean singleTestMode;
+    protected boolean singleTestMode;
     protected String singleTestModeResultID;
     public static ThreadLocal<Result> currentResult;
     protected SlickConfigurationSource configurationSource;
@@ -455,6 +455,7 @@ public class SlickJunitController {
         return configurationSource;
     }
 
+    public boolean getSingleTestMode() { return singleTestMode; }
     /*public void createSuiteResults(ArrayList<Description> children) {
         if(isUsingSlick()) {
             for (Description child : children) {

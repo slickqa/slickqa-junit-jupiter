@@ -51,6 +51,7 @@ public class SingleTestModeTests extends SlickBaseTest {
     @AfterEach
     public void cleanUp() {
         System.setProperty(ConfigurationNames.RESULT_URL, "");
+        util.setResultUrl("");
     }
 
 }
