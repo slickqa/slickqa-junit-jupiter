@@ -47,5 +47,11 @@ public class SingleTestModeTests extends SlickBaseTest {
         assertNotNull(result, "The result from slick should not be null");
         assertEquals(existingResult.getId(), result.getId(), "Result ID should be the same as the result passed in");
     }
+
+    @AfterEach
+    public void cleanUp() {
+        System.setProperty(ConfigurationNames.RESULT_URL, "");
+    }
+
 }
 
