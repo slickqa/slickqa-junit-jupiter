@@ -13,9 +13,11 @@ import org.junit.platform.launcher.TestPlan;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class SlickTestExecutionListener implements TestExecutionListener {
 
+    private static final Logger LOGGER = Logger.getLogger( BeforeEachExtension.class.getName() );
     boolean isUsingSlick(SlickJunitController controller) {
         boolean retval = false;
 
@@ -27,9 +29,10 @@ public class SlickTestExecutionListener implements TestExecutionListener {
     }
 
     protected void fileResultsFor(TestPlan testPlan, TestIdentifier test) {
+        LOGGER.info("fileResultFor called for " + test.getUniqueId());
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
         if(test.isContainer()) {
-            System.out.println("Found container: " + test.getUniqueId());
+            LOGGER.info("Found container: " + test.getUniqueId());
             for(TestIdentifier child : testPlan.getChildren(test.getUniqueId())) {
                 fileResultsFor(testPlan, child);
             }
@@ -45,7 +48,7 @@ public class SlickTestExecutionListener implements TestExecutionListener {
                     try {
                         Method testMethod = clazz.getMethod(methodName);
                         if (!testMethod.isAnnotationPresent(Disabled.class)) {
-                            System.out.println("Creating result for " + automationID);
+                            LOGGER.info("Creating result for " + automationID);
                             controller.getOrCreateResultFor(testMethod, automationID, test.getDisplayName());
                         }
                     } catch (NoSuchMethodException e) {
@@ -67,8 +70,12 @@ public class SlickTestExecutionListener implements TestExecutionListener {
      */
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        System.out.println(")( SlickTestExecutionListener");
+        LOGGER.info("testPlanExecutionStarted called");
         SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
+        if(controller.getSingleTestMode()) {
+            LOGGER.info("Single test mode, will not file any results from testPlan");
+            return;
+        }
         if (isUsingSlick(controller)) {
             Set<TestIdentifier> testRoot = testPlan.getChildren("[engine:junit-jupiter]");
             for (TestIdentifier child : testRoot) {
@@ -139,7 +146,6 @@ public class SlickTestExecutionListener implements TestExecutionListener {
      */
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
-        System.out.println(")( executionStarted");
 
     }
 

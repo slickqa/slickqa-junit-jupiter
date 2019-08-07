@@ -15,12 +15,14 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class SlickTestWatcher implements TestWatcher{
 
 
     private ThreadLocal<SlickLogger> logger;
     private SlickJunitController controller;
+    private static final Logger LOGGER = Logger.getLogger( BeforeEachExtension.class.getName() );
 
 
     private String PASS = "PASS";
@@ -28,6 +30,7 @@ public class SlickTestWatcher implements TestWatcher{
     private String FAIL = "FAIL";
     private String BROKEN_TEST = "BROKEN_TEST";
     private String SKIPPED = "SKIPPED";
+    private boolean wasAborted = false;
 
     public SlickTestWatcher() {
         logger = new ThreadLocal<>();
@@ -60,8 +63,7 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
-        System.out.println("Test is disabled Yomama");
-
+        LOGGER.info("SlickTestWatcher got \"disabled\" result.  Result for " + context.getUniqueId() + "will not report to slick");
     }
 
     /**
@@ -71,8 +73,10 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testSuccessful(ExtensionContext context) {
+        LOGGER.info("SlickTestWatcher got \"pass\" result");
         if (isUsingSlick()) {
             logger.get().debug("Test PASSED.  Reporting to slick");
+            LOGGER.info("Test PASSED.  Reporting to slick");
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
             Optional<Method> testOptional = context.getTestMethod();
             if (testOptional.isPresent()) {
@@ -87,6 +91,7 @@ public class SlickTestWatcher implements TestWatcher{
                 } catch (SlickError e) {
                     e.printStackTrace();
                     logger.get().error("!! ERROR: Unable to update slick result with pass!!", e);
+                    LOGGER.severe("!! ERROR: Unable to update slick result with pass!!");
                 }
             }
         }
@@ -100,7 +105,9 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testAborted(ExtensionContext context, Throwable cause) {
+        LOGGER.info("SlickTestWatcher got \"aborted\" result.  Calling testFailed to fail test.");
         testFailed(context, cause);
+        wasAborted = true;
     }
 
     /**
@@ -111,6 +118,9 @@ public class SlickTestWatcher implements TestWatcher{
      */
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
+        if(!wasAborted) {
+            LOGGER.info("SlickTestWatcher got \"failed\" result.");
+        }
         if (isUsingSlick() && !isScheduleMode()) {
             String status = BROKEN_TEST;
             Store store = context.getStore(Namespace.create(context.getUniqueId()));
@@ -154,7 +164,7 @@ public class SlickTestWatcher implements TestWatcher{
                         SlickJunitController.currentResult.set(updatedResult);
                     } catch (SlickError err) {
                         err.printStackTrace();
-                        System.err.println("!! ERROR: Unable to update slick result with a fail status!!");
+                       LOGGER.severe("!! ERROR: Unable to update slick result with a fail status!!");
                     }
                     TestCaseInfo testInfo = testMethod.getAnnotation(TestCaseInfo.class);
                     if(testInfo != null && testInfo.triageNote() != null && !"".equals(testInfo.triageNote())) {

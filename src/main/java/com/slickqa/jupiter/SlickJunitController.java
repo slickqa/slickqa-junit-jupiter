@@ -13,7 +13,10 @@ import com.slickqa.jupiter.annotations.TestCaseInfo;
 //import org.junit.runner.Description;
 
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
+import java.util.logging.Logger;
 
 /*
  * Common class used by SlickTestWatcher (sends final test result after a test is run)
@@ -23,11 +26,14 @@ import java.util.*;
  */
 public class SlickJunitController {
     protected static boolean usingSlick;
+    protected boolean singleTestMode;
+    protected String singleTestModeResultID;
     public static ThreadLocal<Result> currentResult;
     protected SlickConfigurationSource configurationSource;
     protected SlickClient slickClient;
     protected Project project;
     protected Testrun testrun;
+    private static final Logger LOGGER = Logger.getLogger( BeforeEachExtension.class.getName() );
 
     protected Map<String, Result> results;
 
@@ -50,9 +56,11 @@ public class SlickJunitController {
     }
 
     protected void initializeController() {
+        LOGGER.info("Initializing");
         String baseurl = configurationSource.getConfigurationEntry(ConfigurationNames.BASE_URL, null);
         String projectName = configurationSource.getConfigurationEntry(ConfigurationNames.PROJECT_NAME, null);
-        if(baseurl != null && projectName != null) {
+        if((baseurl != null && projectName != null) || !configurationSource.getConfigurationEntry(ConfigurationNames
+                .RESULT_URL, "").isEmpty()) {
             try {
 
                 ObjectMapper mapper = new ObjectMapper();
@@ -63,15 +71,38 @@ public class SlickJunitController {
                 mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 JsonUtil.mapper = mapper;
 
-                if(!baseurl.endsWith("api") && !baseurl.endsWith("api/")) {
-                    String add = "api/";
-                    if(baseurl.endsWith("/")) {
-                        baseurl = baseurl + add;
-                    } else {
-                        baseurl = baseurl + "/" + add;
+                if(!configurationSource.getConfigurationEntry(ConfigurationNames.RESULT_URL, "").isEmpty()) {
+                    // get result from slick
+                    System.out.println("Single test mode.  Called with a slick Result URL.");
+                    singleTestMode = true;
+                    URL slickurl;
+                    try {
+                        slickurl = new URL(configurationSource.getConfigurationEntry(ConfigurationNames.RESULT_URL));
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                        throw new SlickError("Result URL is not valid");
                     }
+                    String[] pathParts = slickurl.getPath().split("/");
+                    singleTestModeResultID = pathParts[pathParts.length - 1];
+                    String port = "";
+                    if (slickurl.getPort() > 0) {
+                        port = ":" + Integer.toString(slickurl.getPort());
+                    }
+                    baseurl = slickurl.getProtocol() + "://" + slickurl.getHost() + port + "/api/";
+                    slickClient = SlickClientFactory.getSlickClient(baseurl);
+                    usingSlick = true;
+                    return;
+                } else {
+                    if(!baseurl.endsWith("api") && !baseurl.endsWith("api/")) {
+                        String add = "api/";
+                        if(baseurl.endsWith("/")) {
+                            baseurl = baseurl + add;
+                        } else {
+                            baseurl = baseurl + "/" + add;
+                        }
+                    }
+                    slickClient = SlickClientFactory.getSlickClient(baseurl);
                 }
-                slickClient = SlickClientFactory.getSlickClient(baseurl);
                 ProjectReference projectReference = new ProjectReference();
                 ReleaseReference releaseReference = null;
                 BuildReference buildReference = null;
@@ -373,7 +404,39 @@ public class SlickJunitController {
 
     public Result getOrCreateResultFor(Method testDescription, String uniqueID, String displayName) {
         if(isUsingSlick()) {
-            Result result = getResultFor(uniqueID);
+            Result result = null;
+            if(singleTestMode){
+                // in single test mode we only need get the result once even if multiple extensions call this...
+                if(currentResult.get() == null) {
+                    try {
+                        result = slickClient.result(singleTestModeResultID).get();
+                    } catch (SlickError e) {
+                        e.printStackTrace();
+                        System.err.println("!!!! ERROR getting result in single test mode for result ID: " + singleTestModeResultID + " !!!!");
+                    }
+                    try {
+                        testrun = slickClient.testrun(result.getTestrun().getTestrunId()).get();
+                    } catch (SlickError e) {
+                        System.err.println("!!!! This shouldn't happen so it will... ERROR getting testrun for an existing result in single test mode !!!!");
+                    }
+                    currentResult.set(result);
+                    // single test mode results we add to this map and get reported on
+                    // must match the result passed in from the command line
+                    if(result.getTestcase().getAutomationId().equals(uniqueID)) {
+                        results.put(uniqueID, result);
+                        System.err.println("Single test mode for automationID:\n" + result.getTestcase().getAutomationId() +
+                                "\nmatches the junit test to be run: \n" + uniqueID);
+                    } else {
+                        System.err.println("!!!! ERROR Single test mode for automationID:\n" + result.getTestcase().getAutomationId() +
+                                "\ndoes not match the junit test to be run: \n" + uniqueID + "\nThis test will not run nor report to slick");
+                        return null;
+                    }
+                } else {
+                    return currentResult.get();
+                }
+            } else {
+                result = getResultFor(uniqueID);
+            }
             if(result == null) {
                 try {
                     addResultFor(testDescription, uniqueID, displayName);
@@ -395,6 +458,7 @@ public class SlickJunitController {
         return configurationSource;
     }
 
+    public boolean getSingleTestMode() { return singleTestMode; }
     /*public void createSuiteResults(ArrayList<Description> children) {
         if(isUsingSlick()) {
             for (Description child : children) {
