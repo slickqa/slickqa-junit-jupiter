@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.*;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,8 @@ public class BeforeEachExtension implements BeforeEachCallback {
 
     Pattern indexPattern = Pattern.compile(".*(\\d+)\\]$");
 
+    private static final Logger LOGGER = Logger.getLogger( BeforeEachExtension.class.getName() );
+
     /**
      * Callback that is invoked <em>before</em> each test is invoked.
      *
@@ -27,9 +30,10 @@ public class BeforeEachExtension implements BeforeEachCallback {
      */
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
+        LOGGER.info("BeforeEachExtension called");
         if (isUsingSlick()) {
-            System.out.println(")( BeforeEachCallback");
             Store store = context.getStore(Namespace.create(context.getUniqueId()));
+            LOGGER.info("Setting test to skip in case any @BeforeEach (setup) methods fail");
             store.put("skipTest", true);
             SlickJunitController controller = SlickJunitControllerFactory.getControllerInstance();
             if (context.getTestMethod().isPresent()) {
@@ -41,7 +45,6 @@ public class BeforeEachExtension implements BeforeEachCallback {
                     throw new Exception("Scheduling mode, not running test.");
                 }
                 validateDataDrivenArgumentsIfNeeded(context, result);
-
                 Result update = new Result();
                 update.setStarted(new Date());
                 update.setReason("");
@@ -58,12 +61,13 @@ public class BeforeEachExtension implements BeforeEachCallback {
                     }
                 }
                 try {
+                    LOGGER.info("Updating result ID: " + result.getId() + " to RUNNING");
                     updatedResult = controller.getSlickClient().result(result.getId()).update(update);
                     SlickJunitController.currentResult.set(updatedResult);
                     //SlickTestWatcher.currentResult.set(controller.getSlickClient().result(result.getId()).get());
                 } catch (SlickError e) {
+                    LOGGER.severe("!! ERROR: Unable to set result to RUNNING. !!");
                     e.printStackTrace();
-                    System.err.println("!! ERROR: Unable to set result to RUNNING. !!");
                     SlickJunitController.currentResult.set(null);
                 }
             }
@@ -77,12 +81,14 @@ public class BeforeEachExtension implements BeforeEachCallback {
         if(controller != null && SlickJunitController.isUsingSlick()) {
             retval = true;
         }
-
+        LOGGER.info(retval ? "Using slick" : "Not using slick");
         return retval;
     }
 
     boolean resultIsRunningFromPreviousScheduling(Result result) {
-        return result != null && result.getAttributes() != null && "true".equalsIgnoreCase(result.getAttributes().get("scheduled"));
+        boolean retval = result != null && result.getAttributes() != null && "true".equalsIgnoreCase(result.getAttributes().get("scheduled"));
+        LOGGER.info(retval ? "This test was previously scheduled" : "This test was NOT previously scheduled");
+        return retval;
     }
 
     void validateDataDrivenArgumentsIfNeeded(ExtensionContext context, Result result) throws Exception {
@@ -94,6 +100,7 @@ public class BeforeEachExtension implements BeforeEachCallback {
                     !result.getAttributes().get("jupiterArgumentsChecksum").equalsIgnoreCase(checksums.getChecksum(index))) {
                 throw new Exception("Invalid data driven arguments");
             }
+            LOGGER.info("Data driven arguments validated");
         }
     }
 
@@ -106,6 +113,7 @@ public class BeforeEachExtension implements BeforeEachCallback {
                 Result update = new Result();
                 update.setAttributes(new HashMap<>(result.getAttributes()));
                 update.getAttributes().put("jupiterArgumentsChecksum", checksums.getChecksum(index));
+                LOGGER.info("Adding data driven attributes");
                 controller.getSlickClient().result(result.getId()).update(update);
             }
         }

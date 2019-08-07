@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Logger;
 
 /*
  * Common class used by SlickTestWatcher (sends final test result after a test is run)
@@ -32,6 +33,7 @@ public class SlickJunitController {
     protected SlickClient slickClient;
     protected Project project;
     protected Testrun testrun;
+    private static final Logger LOGGER = Logger.getLogger( BeforeEachExtension.class.getName() );
 
     protected Map<String, Result> results;
 
@@ -54,6 +56,7 @@ public class SlickJunitController {
     }
 
     protected void initializeController() {
+        LOGGER.info("Initializing");
         String baseurl = configurationSource.getConfigurationEntry(ConfigurationNames.BASE_URL, null);
         String projectName = configurationSource.getConfigurationEntry(ConfigurationNames.PROJECT_NAME, null);
         if((baseurl != null && projectName != null) || !configurationSource.getConfigurationEntry(ConfigurationNames
