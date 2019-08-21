@@ -20,3 +20,6 @@ To post results to Slick you will need to provide some Java opts.
 For example:
 -Dslick.baseurl=http://slick.mycompany.com -Dslick.project=automation -Dslick.release=junit5 -Dslick.build=86-4pm-suite -Dslick.testplan=smoke-tests
 
+See our example project:
+https://github.com/slickqa/junit5-slick-sample
+
