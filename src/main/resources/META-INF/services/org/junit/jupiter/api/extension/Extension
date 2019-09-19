@@ -1,0 +1,3 @@
+com.slickqa.jupiter.SlickTestWatcher
+com.slickqa.jupiter.BeforeEachExtension
+com.slickqa.jupiter.BeforeTestExecutionExtension
