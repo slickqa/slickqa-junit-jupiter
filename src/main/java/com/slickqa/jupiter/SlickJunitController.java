@@ -88,7 +88,7 @@ public class SlickJunitController {
                     if (slickurl.getPort() > 0) {
                         port = ":" + Integer.toString(slickurl.getPort());
                     }
-                    baseurl = slickurl.getProtocol() + "://" + slickurl.getHost() + port + "/api/";
+                    baseurl = slickurl.getProtocol() + "://" + slickurl.getHost() + port + slickurl.getPath().split("/results")[0];
                     slickClient = SlickClientFactory.getSlickClient(baseurl);
                     usingSlick = true;
                     return;
